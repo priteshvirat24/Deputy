@@ -28,11 +28,11 @@ export class ParticleField {
     geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
 
     const material = new THREE.PointsMaterial({
-      color: 0x64748b,
-      size: 0.06,
+      color: 0x94a3b8,
+      size: 0.05,
       transparent: true,
-      opacity: 0.35,
-      blending: THREE.AdditiveBlending,
+      opacity: 0.4,
+      blending: THREE.NormalBlending,
       depthWrite: false,
     });
 

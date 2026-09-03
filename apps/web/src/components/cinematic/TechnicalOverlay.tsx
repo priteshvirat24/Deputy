@@ -31,30 +31,30 @@ export const TechnicalOverlay: React.FC<TechnicalOverlayProps> = ({ scene, scene
       {scene.id === 'DEMONSTRATE' && (
         <div className="cinematic-panel">
           <div className="cinematic-panel-header">
-            <Cpu size={14} style={{ color: '#06b6d4' }} />
+            <Cpu size={14} style={{ color: '#0891b2' }} />
             <span>SEMANTIC_ACTION_TRACE</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div className="cinematic-trace-item active">
-              <span className="mono" style={{ color: '#38bdf8' }}>
+              <span className="mono" style={{ color: '#0891b2', fontWeight: 700 }}>
                 01
               </span>
               <span>customer.create</span>
               <span className="cinematic-badge">CAPTURED</span>
             </div>
             <div className="cinematic-trace-item active">
-              <span className="mono" style={{ color: '#38bdf8' }}>
+              <span className="mono" style={{ color: '#0891b2', fontWeight: 700 }}>
                 02
               </span>
               <span>invoice.create</span>
               <span className="cinematic-badge">CAPTURED</span>
             </div>
             <div className="cinematic-trace-item">
-              <span className="mono" style={{ color: '#64748b' }}>
+              <span className="mono" style={{ color: '#71717a' }}>
                 03
               </span>
               <span>followup.schedule</span>
-              <span className="cinematic-badge" style={{ color: '#94a3b8' }}>
+              <span className="cinematic-badge" style={{ color: '#71717a' }}>
                 PENDING
               </span>
             </div>
@@ -66,26 +66,32 @@ export const TechnicalOverlay: React.FC<TechnicalOverlayProps> = ({ scene, scene
       {scene.id === 'SYNTHESIZE' && (
         <div className="cinematic-panel">
           <div className="cinematic-panel-header">
-            <Shield size={14} style={{ color: '#c084fc' }} />
+            <Shield size={14} style={{ color: '#7c3aed' }} />
             <span>VARIATIONAL_PARAMETER_INFERENCE</span>
           </div>
-          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 8 }}>
+          <div style={{ fontSize: '0.74rem', color: '#52525b', marginBottom: 8 }}>
             Capability:{' '}
-            <span className="mono" style={{ color: '#ffffff', fontWeight: 600 }}>
+            <span className="mono" style={{ color: '#09090b', fontWeight: 700 }}>
               create_customer_with_invoice
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div className="cinematic-param-row">
-              <span className="mono">customerName</span>
+              <span className="mono" style={{ color: '#18181b' }}>
+                customerName
+              </span>
               <span className="cinematic-type">string (inferred)</span>
             </div>
             <div className="cinematic-param-row">
-              <span className="mono">customerEmail</span>
+              <span className="mono" style={{ color: '#18181b' }}>
+                customerEmail
+              </span>
               <span className="cinematic-type">string [email]</span>
             </div>
             <div className="cinematic-param-row">
-              <span className="mono">invoiceAmount</span>
+              <span className="mono" style={{ color: '#18181b' }}>
+                invoiceAmount
+              </span>
               <span className="cinematic-type">number (INR)</span>
             </div>
           </div>
@@ -94,8 +100,8 @@ export const TechnicalOverlay: React.FC<TechnicalOverlayProps> = ({ scene, scene
 
       {/* SCENE: SCHEMA - Strict JSON Schema */}
       {scene.id === 'SCHEMA' && (
-        <div className="cinematic-panel" style={{ borderColor: 'rgba(56, 189, 248, 0.4)' }}>
-          <div className="cinematic-panel-header" style={{ color: '#38bdf8' }}>
+        <div className="cinematic-panel" style={{ borderColor: '#bae6fd' }}>
+          <div className="cinematic-panel-header" style={{ color: '#0284c7' }}>
             <Code2 size={14} />
             <span>DECLARATIVE_JSON_SCHEMA</span>
           </div>
@@ -103,11 +109,12 @@ export const TechnicalOverlay: React.FC<TechnicalOverlayProps> = ({ scene, scene
             className="mono"
             style={{
               fontSize: '0.72rem',
-              color: '#38bdf8',
+              color: '#0369a1',
               margin: 0,
-              background: 'rgba(0, 0, 0, 0.4)',
+              background: '#f0f9ff',
+              border: '1px solid #bae6fd',
               padding: '8px 10px',
-              borderRadius: 4,
+              borderRadius: 6,
               lineHeight: 1.4,
             }}
           >
@@ -122,23 +129,26 @@ export const TechnicalOverlay: React.FC<TechnicalOverlayProps> = ({ scene, scene
 
       {/* SCENE: AUTHORIZE - Passkey UV Card */}
       {scene.id === 'AUTHORIZE' && (
-        <div className="cinematic-panel" style={{ borderColor: 'rgba(129, 140, 248, 0.4)' }}>
-          <div className="cinematic-panel-header" style={{ color: '#818cf8' }}>
+        <div className="cinematic-panel" style={{ borderColor: '#ddd6fe' }}>
+          <div className="cinematic-panel-header" style={{ color: '#6d28d9' }}>
             <Key size={14} />
             <span>WEBAUTHN_UV_CHALLENGE</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-              <span style={{ color: '#94a3b8' }}>Risk Level:</span>
-              <span style={{ color: '#fdba74', fontWeight: 700 }}>HIGH (MONETARY)</span>
+              <span style={{ color: '#52525b' }}>Risk Level:</span>
+              <span style={{ color: '#c2410c', fontWeight: 700 }}>HIGH (MONETARY)</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-              <span style={{ color: '#94a3b8' }}>User Verification:</span>
-              <span style={{ color: '#34d399', fontWeight: 700 }}>HARDWARE ENFORCED</span>
+              <span style={{ color: '#52525b' }}>User Verification:</span>
+              <span style={{ color: '#047857', fontWeight: 700 }}>HARDWARE ENFORCED</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-              <span style={{ color: '#94a3b8' }}>Canonical Digest:</span>
-              <span className="mono" style={{ color: '#818cf8', fontSize: '0.7rem' }}>
+              <span style={{ color: '#52525b' }}>Canonical Digest:</span>
+              <span
+                className="mono"
+                style={{ color: '#6d28d9', fontSize: '0.7rem', fontWeight: 600 }}
+              >
                 7f2a9c...08b4
               </span>
             </div>
@@ -148,8 +158,8 @@ export const TechnicalOverlay: React.FC<TechnicalOverlayProps> = ({ scene, scene
 
       {/* SCENE: EXECUTE - WebMCP Routing */}
       {scene.id === 'EXECUTE' && (
-        <div className="cinematic-panel" style={{ borderColor: 'rgba(16, 185, 129, 0.4)' }}>
-          <div className="cinematic-panel-header" style={{ color: '#10b981' }}>
+        <div className="cinematic-panel" style={{ borderColor: '#a7f3d0' }}>
+          <div className="cinematic-panel-header" style={{ color: '#059669' }}>
             <CheckCircle2 size={14} />
             <span>WEBMCP_EXECUTION_PIPELINE</span>
           </div>
@@ -175,33 +185,30 @@ export const TechnicalOverlay: React.FC<TechnicalOverlayProps> = ({ scene, scene
 
       {/* SCENE: TAMPER_REJECTION - Tamper Rejection */}
       {scene.id === 'TAMPER_REJECTION' && (
-        <div
-          className="cinematic-panel"
-          style={{ borderColor: 'rgba(244, 63, 94, 0.5)', background: 'rgba(244, 63, 94, 0.08)' }}
-        >
-          <div className="cinematic-panel-header" style={{ color: '#f43f5e' }}>
+        <div className="cinematic-panel" style={{ borderColor: '#fecaca', background: '#fff5f5' }}>
+          <div className="cinematic-panel-header" style={{ color: '#dc2626' }}>
             <AlertTriangle size={14} />
             <span>ARGUMENT_DIGEST_MISMATCH</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-              <span style={{ color: '#94a3b8' }}>Authorized:</span>
-              <span className="mono" style={{ color: '#34d399' }}>
+              <span style={{ color: '#52525b' }}>Authorized:</span>
+              <span className="mono" style={{ color: '#059669', fontWeight: 600 }}>
                 invoiceAmount: ₹2,500
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-              <span style={{ color: '#94a3b8' }}>Attempted:</span>
-              <span className="mono" style={{ color: '#f87171', fontWeight: 700 }}>
+              <span style={{ color: '#52525b' }}>Attempted:</span>
+              <span className="mono" style={{ color: '#dc2626', fontWeight: 700 }}>
                 invoiceAmount: ₹5,000
               </span>
             </div>
             <div
               style={{
                 padding: '6px 8px',
-                background: 'rgba(244, 63, 94, 0.15)',
+                background: '#fee2e2',
                 borderRadius: 4,
-                color: '#fecdd3',
+                color: '#991b1b',
                 fontSize: '0.72rem',
                 fontWeight: 700,
                 textAlign: 'center',
@@ -217,25 +224,25 @@ export const TechnicalOverlay: React.FC<TechnicalOverlayProps> = ({ scene, scene
       {scene.id === 'ARCHITECTURE' && (
         <div className="cinematic-panel">
           <div className="cinematic-panel-header">
-            <Lock size={14} style={{ color: '#38bdf8' }} />
+            <Lock size={14} style={{ color: '#0284c7' }} />
             <span>SYNCHRONIZED_SECURITY_LAYERS</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.72rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#94a3b8' }}>Runtime:</span>
-              <span className="mono" style={{ color: '#06b6d4' }}>
+              <span style={{ color: '#52525b' }}>Runtime:</span>
+              <span className="mono" style={{ color: '#0891b2', fontWeight: 600 }}>
                 WebMCP Protocol
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#94a3b8' }}>Authority:</span>
-              <span className="mono" style={{ color: '#818cf8' }}>
+              <span style={{ color: '#52525b' }}>Authority:</span>
+              <span className="mono" style={{ color: '#7c3aed', fontWeight: 600 }}>
                 FIDO2 WebAuthn UV
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#94a3b8' }}>Audit:</span>
-              <span className="mono" style={{ color: '#10b981' }}>
+              <span style={{ color: '#52525b' }}>Audit:</span>
+              <span className="mono" style={{ color: '#059669', fontWeight: 600 }}>
                 SHA-256 Hash Chain
               </span>
             </div>

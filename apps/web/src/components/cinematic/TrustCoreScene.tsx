@@ -39,10 +39,10 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
     const width = mountRef.current.clientWidth;
     const height = mountRef.current.clientHeight;
 
-    // 1. Scene
+    // 1. Scene on Pure White Architectural Foundation
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x07080a);
-    scene.fog = new THREE.FogExp2(0x07080a, 0.04);
+    scene.background = new THREE.Color(0xffffff);
+    scene.fog = new THREE.FogExp2(0xffffff, 0.02);
     sceneRef.current = scene;
 
     // 2. Camera Controller
@@ -58,7 +58,7 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.15;
     mountRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -90,17 +90,17 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
     // 9. Hero "Capability Trust Core" Object
     const coreGroup = new THREE.Group();
 
-    // Outer Translucent Dark-Glass Box
+    // Outer Translucent Dark-Graphite Box (High Contrast on White)
     const outerGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
     const outerMat = new THREE.MeshPhysicalMaterial({
-      color: 0x111827,
+      color: 0x18181b,
       transparent: true,
-      opacity: 0.72,
-      roughness: 0.1,
-      metalness: 0.2,
-      transmission: 0.6,
-      ior: 1.4,
-      reflectivity: 0.8,
+      opacity: 0.85,
+      roughness: 0.18,
+      metalness: 0.45,
+      transmission: 0.25,
+      ior: 1.45,
+      reflectivity: 0.9,
     });
     const outerCube = new THREE.Mesh(outerGeo, outerMat);
     outerCubeRef.current = outerCube;
@@ -109,9 +109,9 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
     // Outer Edge Highlights
     const edgeGeo = new THREE.EdgesGeometry(outerGeo);
     const edgeMat = new THREE.LineBasicMaterial({
-      color: 0x818cf8,
+      color: 0x7c3aed,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.6,
     });
     const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
     outerCube.add(edgeLines);
@@ -119,7 +119,7 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
     // Inner Luminous Geometric Core (Octahedron)
     const innerGeo = new THREE.OctahedronGeometry(0.55, 0);
     const innerMat = new THREE.MeshBasicMaterial({
-      color: 0x818cf8,
+      color: 0x7c3aed,
       wireframe: false,
     });
     const innerCore = new THREE.Mesh(innerGeo, innerMat);
@@ -132,17 +132,29 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
       color: 0xffffff,
       wireframe: true,
       transparent: true,
-      opacity: 0.2,
+      opacity: 0.25,
     });
     const cage = new THREE.Mesh(cageGeo, cageMat);
     coreGroup.add(cage);
 
     scene.add(coreGroup);
 
-    // 10. Subtle Circular Ground Platform
+    // 10. Subtle Circular Ground Platform with Contact Shadow
     const platform = new THREE.Group();
     platform.position.y = -1.6;
 
+    // Contact shadow under the core
+    const shadowGeo = new THREE.CircleGeometry(1.6, 32);
+    shadowGeo.rotateX(-Math.PI / 2);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x94a3b8,
+      transparent: true,
+      opacity: 0.2,
+    });
+    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+    platform.add(shadowMesh);
+
+    // Circular concentric lines
     for (let r = 1.2; r <= 3.8; r += 0.8) {
       const circleGeo = new THREE.BufferGeometry();
       const pts: THREE.Vector3[] = [];
@@ -152,9 +164,9 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
       }
       circleGeo.setFromPoints(pts);
       const circleMat = new THREE.LineBasicMaterial({
-        color: 0x1e293b,
+        color: 0xcbd5e1,
         transparent: true,
-        opacity: 0.5 - r * 0.08,
+        opacity: 0.6 - r * 0.08,
       });
       platform.add(new THREE.Line(circleGeo, circleMat));
     }
@@ -165,11 +177,16 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
     const handleMouseDown = (e: MouseEvent) => cameraController.onMouseDown(e.clientX, e.clientY);
     const handleMouseMove = (e: MouseEvent) => cameraController.onMouseMove(e.clientX, e.clientY);
     const handleMouseUp = () => cameraController.onMouseUp();
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      cameraController.onWheel(e.deltaY);
+    };
 
     const dom = renderer.domElement;
     dom.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
+    dom.addEventListener('wheel', handleWheel, { passive: false });
 
     // Resize handler
     const handleResize = () => {
@@ -193,12 +210,12 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
 
       // Rotate Trust Core
       if (outerCubeRef.current) {
-        outerCubeRef.current.rotation.x += 0.004;
-        outerCubeRef.current.rotation.y += 0.006;
+        outerCubeRef.current.rotation.x += 0.003;
+        outerCubeRef.current.rotation.y += 0.005;
       }
       if (innerCoreRef.current) {
-        innerCoreRef.current.rotation.x -= 0.008;
-        innerCoreRef.current.rotation.y += 0.01;
+        innerCoreRef.current.rotation.x -= 0.006;
+        innerCoreRef.current.rotation.y += 0.008;
       }
 
       // Update particles
@@ -215,6 +232,7 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
       dom.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      dom.removeEventListener('wheel', handleWheel);
       window.removeEventListener('resize', handleResize);
 
       particles.dispose();

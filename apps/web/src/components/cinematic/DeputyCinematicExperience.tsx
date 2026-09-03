@@ -114,40 +114,45 @@ export const DeputyCinematicExperience: React.FC<DeputyCinematicExperienceProps>
 
   return (
     <div ref={containerRef} className="cinematic-experience-root" role="dialog" aria-modal="true">
-      {/* 3D WebGL Three.js Canvas */}
+      {/* 3D WebGL Three.js Canvas on White */}
       <TrustCoreScene currentTime={currentTime} isPlaying={isPlaying} />
 
-      {/* Cinematic Radial Vignette */}
+      {/* Subtle Technical Radial Grid on White */}
       <div className="cinematic-vignette" />
+
+      {/* Interaction Hint */}
+      <div className="cinematic-interaction-cue">
+        ✦ Click & Drag to Orbit 3D Core · Scroll to Zoom
+      </div>
 
       {/* Top Controls Bar */}
       <header className="cinematic-topbar">
         <div className="cinematic-brand">
           <div
             style={{
-              width: 28,
-              height: 28,
+              width: 30,
+              height: 30,
               borderRadius: 6,
-              background: 'rgba(129, 140, 248, 0.15)',
-              border: '1px solid rgba(129, 140, 248, 0.4)',
+              background: '#09090b',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#818cf8',
+              color: '#ffffff',
             }}
           >
             <Shield size={16} />
           </div>
           <span className="cinematic-brand-title">DEPUTY</span>
-          <span className="cinematic-brand-badge">JUDGE FILM · 35S</span>
+          <span className="cinematic-brand-badge">JUDGE MODE · 38S</span>
         </div>
 
         <div className="cinematic-controls-top">
           <button
             type="button"
-            className="cinematic-btn"
+            className="cinematic-btn-icon"
             onClick={() => setPlaybackSpeed(s => (s === 1.0 ? 1.5 : s === 1.5 ? 2.0 : 1.0))}
             title="Toggle playback speed"
+            style={{ width: 'auto', padding: '0 10px', gap: 4 }}
           >
             <FastForward size={13} />
             <span className="mono">{playbackSpeed}x</span>
@@ -155,7 +160,7 @@ export const DeputyCinematicExperience: React.FC<DeputyCinematicExperienceProps>
 
           <button
             type="button"
-            className="cinematic-btn"
+            className="cinematic-btn-icon"
             onClick={toggleFullscreen}
             title="Toggle fullscreen"
           >
@@ -164,12 +169,16 @@ export const DeputyCinematicExperience: React.FC<DeputyCinematicExperienceProps>
 
           <button
             type="button"
-            className="cinematic-btn"
+            className="cinematic-btn-icon"
             onClick={onClose}
             style={{
-              background: 'rgba(239, 68, 68, 0.15)',
-              color: '#fca5a5',
-              borderColor: 'rgba(239, 68, 68, 0.3)',
+              background: '#fef2f2',
+              color: '#dc2626',
+              borderColor: '#fecaca',
+              width: 'auto',
+              padding: '0 12px',
+              gap: 6,
+              fontWeight: 600,
             }}
             title="Exit Cinematic Experience (Esc)"
           >
@@ -214,35 +223,29 @@ export const DeputyCinematicExperience: React.FC<DeputyCinematicExperienceProps>
           </div>
 
           {/* Time & Play/Pause Actions */}
-          <div className="cinematic-playback-actions">
-            <span
-              className="mono"
-              style={{ fontSize: '0.78rem', color: '#94a3b8', marginRight: 8 }}
-            >
-              {formatTime(currentTime)} / 00:38.0
-            </span>
+          <div className="cinematic-controls-bottom">
+            <span className="cinematic-time-readout">{formatTime(currentTime)} / 00:38.0</span>
 
             <button
               type="button"
-              className="cinematic-btn"
+              className="cinematic-btn-icon"
               onClick={handleRestart}
               title="Restart from beginning"
             >
-              <RotateCcw size={13} />
+              <RotateCcw size={14} />
             </button>
 
             <button
               type="button"
-              className="cinematic-btn primary"
+              className="cinematic-btn-play"
               onClick={togglePlay}
               title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
             >
               {isPlaying ? (
-                <Pause size={13} fill="currentColor" />
+                <Pause size={14} fill="currentColor" />
               ) : (
-                <Play size={13} fill="currentColor" />
+                <Play size={14} fill="currentColor" />
               )}
-              <span>{isPlaying ? 'Pause' : 'Play'}</span>
             </button>
           </div>
         </div>
