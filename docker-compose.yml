@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: deputy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: deputy_secure_dev_password
+      POSTGRES_DB: deputy_prod
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d deputy_prod']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  deputy-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deputy-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgres://postgres:deputy_secure_dev_password@postgres:5432/deputy_prod
+      REPOSITORY_MODE: POSTGRES
+      RP_ID: localhost
+      RP_NAME: DEPUTY Production Authority
+      ORIGIN: http://localhost:5173
+      WEBAUTHN_ORIGIN: http://localhost:5173
+      ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      SESSION_SECRET: prod_secure_secret_must_be_at_least_32_characters_long_12345
+      RATE_LIMIT_BACKEND: memory
+      LOG_LEVEL: info
+    ports:
+      - '4000:4000'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/api/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,30 @@
+{
+  "name": "@deputy/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@deputy/config": "workspace:*",
+    "@deputy/database": "workspace:*",
+    "@deputy/domain": "workspace:*",
+    "@deputy/schemas": "workspace:*",
+    "@deputy/security": "workspace:*",
+    "@deputy/synthesis": "workspace:*",
+    "@deputy/webmcp": "workspace:*",
+    "@hono/node-server": "^1.13.8",
+    "@hono/zod-validator": "^0.4.3",
+    "@simplewebauthn/server": "^13.1.1",
+    "hono": "^4.7.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

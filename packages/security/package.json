@@ -1,0 +1,27 @@
+{
+  "name": "@deputy/security",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@deputy/config": "workspace:*",
+    "@deputy/domain": "workspace:*",
+    "@deputy/schemas": "workspace:*",
+    "@simplewebauthn/server": "^13.3.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@deputy/domain": ["packages/domain/src/index.ts"],
+      "@deputy/schemas": ["packages/schemas/src/index.ts"],
+      "@deputy/webmcp": ["packages/webmcp/src/index.ts"],
+      "@deputy/security": ["packages/security/src/index.ts"],
+      "@deputy/database": ["packages/database/src/index.ts"],
+      "@deputy/config": ["packages/config/src/index.ts"],
+      "@deputy/synthesis": ["packages/synthesis/src/index.ts"]
+    }
+  },
+  "include": ["packages/*/src", "apps/*/src", "tests/**/*"]
+}
