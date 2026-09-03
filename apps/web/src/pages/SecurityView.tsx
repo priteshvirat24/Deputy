@@ -31,7 +31,7 @@ export const SecurityView: React.FC = () => {
     setLoadingPasskeys(true);
     try {
       const res = await fetch(
-        'http://localhost:4000/api/auth/webauthn/credentials?actorId=usr_ops_lead',
+        '/api/auth/webauthn/credentials?actorId=usr_ops_lead',
       );
       const json = await res.json();
       if (json.data) {
@@ -50,7 +50,7 @@ export const SecurityView: React.FC = () => {
 
     try {
       // 1. Fetch registration options from server
-      const optionsRes = await fetch('http://localhost:4000/api/auth/webauthn/register/options', {
+      const optionsRes = await fetch('/api/auth/webauthn/register/options', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -69,7 +69,7 @@ export const SecurityView: React.FC = () => {
       const registrationResponse = await startRegistration({ optionsJSON: optionsData.data });
 
       // 3. Verify registration response on server
-      const verifyRes = await fetch('http://localhost:4000/api/auth/webauthn/register/verify', {
+      const verifyRes = await fetch('/api/auth/webauthn/register/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -99,7 +99,7 @@ export const SecurityView: React.FC = () => {
   const revokePasskey = async (credentialId: string) => {
     try {
       const res = await fetch(
-        `http://localhost:4000/api/auth/webauthn/credentials/${credentialId}/revoke`,
+        `/api/auth/webauthn/credentials/${credentialId}/revoke`,
         {
           method: 'POST',
         },

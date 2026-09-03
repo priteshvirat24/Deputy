@@ -30,7 +30,7 @@ export const SettingsView: React.FC = () => {
               </div>
             </div>
             <div className="mono" style={{ color: 'var(--accent-cyan)' }}>
-              http://127.0.0.1:4000
+              {`${window.location.origin}/api`}
             </div>
           </div>
 

@@ -25,21 +25,21 @@ export const App: React.FC = () => {
   const fetchData = async () => {
     try {
       // 1. Fetch Tools
-      const toolsRes = await fetch('http://localhost:4000/api/tools');
+      const toolsRes = await fetch('/api/tools');
       if (toolsRes.ok) {
         const data = await toolsRes.json();
         setTools(data.data || []);
       }
 
       // 2. Fetch Demonstrations
-      const demosRes = await fetch('http://localhost:4000/api/demonstrations');
+      const demosRes = await fetch('/api/demonstrations');
       if (demosRes.ok) {
         const data = await demosRes.json();
         setDemonstrations(data.data || []);
       }
 
       // 3. Fetch Audit Events
-      const auditRes = await fetch('http://localhost:4000/api/audit');
+      const auditRes = await fetch('/api/audit');
       if (auditRes.ok) {
         const data = await auditRes.json();
         setAuditEvents(data.data || []);
@@ -58,7 +58,7 @@ export const App: React.FC = () => {
   // Recording controls
   const handleStartRecording = async (taskDescription: string) => {
     try {
-      const res = await fetch('http://localhost:4000/api/demonstrations/recording/start', {
+      const res = await fetch('/api/demonstrations/recording/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ taskDescription }),
@@ -84,7 +84,7 @@ export const App: React.FC = () => {
     if (!recording) return;
     try {
       await fetch(
-        `http://localhost:4000/api/demonstrations/${recording.demonstrationId}/recording/pause`,
+        `/api/demonstrations/${recording.demonstrationId}/recording/pause`,
         {
           method: 'POST',
         },
@@ -99,7 +99,7 @@ export const App: React.FC = () => {
     if (!recording) return;
     try {
       await fetch(
-        `http://localhost:4000/api/demonstrations/${recording.demonstrationId}/recording/resume`,
+        `/api/demonstrations/${recording.demonstrationId}/recording/resume`,
         {
           method: 'POST',
         },
@@ -114,7 +114,7 @@ export const App: React.FC = () => {
     if (!recording) return;
     try {
       await fetch(
-        `http://localhost:4000/api/demonstrations/${recording.demonstrationId}/recording/complete`,
+        `/api/demonstrations/${recording.demonstrationId}/recording/complete`,
         {
           method: 'POST',
         },
@@ -131,7 +131,7 @@ export const App: React.FC = () => {
     if (!recording) return;
     try {
       await fetch(
-        `http://localhost:4000/api/demonstrations/${recording.demonstrationId}/recording/discard`,
+        `/api/demonstrations/${recording.demonstrationId}/recording/discard`,
         {
           method: 'POST',
         },

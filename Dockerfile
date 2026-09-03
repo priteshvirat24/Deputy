@@ -35,7 +35,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=4000
 ENV HOST=0.0.0.0
-ENV REPOSITORY_MODE=POSTGRES
+# Single-origin serving: the API server also serves the built SPA so the
+# WebAuthn RP and the client share one origin.
+ENV SERVE_STATIC=true
+# Zero-dependency cold open for the demo: in-memory repositories, no external
+# database required. Swap to POSTGRES + DATABASE_URL for a durable deployment.
+ENV REPOSITORY_MODE=MEMORY
+ENV ALLOW_IN_MEMORY_DEV=true
 
 # Create dedicated non-root user
 RUN addgroup -S deputy && adduser -S deputy -G deputy

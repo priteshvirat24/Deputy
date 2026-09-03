@@ -39,7 +39,7 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ tools, onRefresh }) => {
         headers['x-deputy-authorization-id'] = authorizationId;
       }
 
-      const res = await fetch('http://localhost:4000/api/tool-proposals', {
+      const res = await fetch('/api/tool-proposals', {
         method: 'POST',
         headers,
         body: JSON.stringify({

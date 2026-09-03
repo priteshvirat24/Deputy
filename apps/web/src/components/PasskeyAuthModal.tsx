@@ -36,7 +36,7 @@ export const PasskeyAuthModal: React.FC<PasskeyAuthModalProps> = ({
     try {
       // 1. Request cryptographically bound WebAuthn challenge from server
       const challengeRes = await fetch(
-        'http://localhost:4000/api/auth/webauthn/authorize/challenge',
+        '/api/auth/webauthn/authorize/challenge',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -61,7 +61,7 @@ export const PasskeyAuthModal: React.FC<PasskeyAuthModalProps> = ({
       const authResponse = await startAuthentication({ optionsJSON: options });
 
       // 3. Send authenticator assertion to server for cryptographic verification
-      const verifyRes = await fetch('http://localhost:4000/api/auth/webauthn/authorize/verify', {
+      const verifyRes = await fetch('/api/auth/webauthn/authorize/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

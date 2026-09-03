@@ -1,0 +1,29 @@
+# Render blueprint for a single-origin DEPUTY deploy.
+# The API server also serves the built SPA (SERVE_STATIC), so the WebAuthn RP
+# and the client share one HTTPS origin. WebAuthn config (RP_ID / ORIGIN /
+# WEBAUTHN_ORIGIN / ALLOWED_ORIGINS) is auto-derived at boot from Render's
+# RENDER_EXTERNAL_HOSTNAME, so the first deploy comes up correctly with no
+# manual origin wiring.
+services:
+  - type: web
+    name: deputy
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_STATIC
+        value: 'true'
+      - key: HOST
+        value: 0.0.0.0
+      # In-memory repositories: zero-DB cold open for the demo.
+      - key: REPOSITORY_MODE
+        value: MEMORY
+      - key: ALLOW_IN_MEMORY_DEV
+        value: 'true'
+      # Render injects PORT and RENDER_EXTERNAL_HOSTNAME automatically.
+      - key: SESSION_SECRET
+        generateValue: true
