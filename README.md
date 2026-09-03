@@ -1,30 +1,41 @@
 # DEPUTY
 
-> **A human demonstrates a task once. DEPUTY converts that demonstration into a typed, parameterized WebMCP capability that an agent can use afterward, while dangerous actions remain cryptographically bound to explicit human authorization backed by hardware passkeys.**
+**A human demonstrates a task once. DEPUTY turns it into a typed WebMCP tool — and
+every irreversible call is refused until a human produces a passkey assertion
+bound to the SHA-256 digest of the exact tool, version, and arguments.**
+
+- 🌐 **Live demo:** https://deputy-webmcp.onrender.com *(register a passkey, then propose the refund tool)*
+- 🎬 **Demo video:** _<!-- add final video URL -->_ · script in [`docs/demo-script.md`](docs/demo-script.md)
+- 🧩 **What it advances in the standard:** [`docs/spec-contributions.md`](docs/spec-contributions.md)
+
+### The open bug it fixes
+
+WebMCP spec **issue #288**, filed during the submission window: an agent called a
+tool, saw the page's own **Approve** button, and clicked it — the receipt recorded
+approval "by you," though no human decided anything. DEPUTY removes the button.
+Approval is not a UI element an agent can actuate; it is a WebAuthn
+user-verification assertion cryptographically bound to the exact arguments, which
+an agent cannot manufacture. Change one argument and the attestation is void.
+
+### Two pipelines
+
+```text
+LEARN     Demonstrate ─▶ Compare ─▶ Infer schema ─▶ Typed WebMCP tool
+                                                        │  registerTool(tool,{signal})
+                                                        ▼
+GOVERN    Agent proposes ─▶ Policy ─▶ Structured refusal ─▶ Passkey (UV, digest-bound)
+                                                        ─▶ Single-use commit ─▶ Hash-chained audit
+```
+
+That is the whole idea: the human authors capability by doing the work once; the
+agent's authority is bounded — at the type level and cryptographically — by
+exactly what the human demonstrated and attested to. Together, not "instead of."
+
+Everything below the fold is evidence: the 37 invariants, the monorepo, the tests.
 
 ---
 
-## 1. The DEPUTY Paradigm
-
-DEPUTY is not a chatbot, browser automation macro recorder, or generic MCP wrapper. It is a production-grade WebMCP authority platform built around two decoupled pipelines:
-
-```text
-DEMONSTRATE → COMPARE → SYNTHESIZE → REVIEW → APPROVE → REGISTER → AGENT PROPOSES → POLICY CHECK → PASSKEY (UV) → EXECUTE → AUDIT
-```
-
-### The Dual Architecture Pipelines
-
-```text
-1. Tool Synthesis Pipeline (Learning Boundary):
-   Human Demonstration → Semantic Action Trace → Alignment & Inference → Strict JSON Schema → WebMCP Capability
-
-2. Security & Execution Pipeline (Execution Boundary):
-   Agent Proposal → QUARANTINE Boundary → Policy Engine → FIDO2 WebAuthn (UV) → Exact Digest Check → ActionRegistry Execution → Hash Chain Audit
-```
-
----
-
-## 2. Monorepo Architecture
+## 1. Monorepo Architecture
 
 ```text
 Deputy/
@@ -41,7 +52,7 @@ Deputy/
 │   ├── database/               # PostgreSQL schema (Drizzle ORM), migrations, repositories, and atomic concurrency guards
 │   └── config/                 # Strict environment validation contract and security constants
 │
-├── tests/                      # Comprehensive test suites (168 tests, 100% passing across 18 test files)
+├── tests/                      # Comprehensive test suites (175 tests, 100% passing across 19 test files)
 │   ├── canonical-attacks-a-h.test.ts       # Authoritative Attacks Matrix (Attacks A through H)
 │   ├── deputy-security-invariants.test.ts  # Full 37 Security Invariants Verification
 │   ├── composite-transaction.test.ts       # Transaction safety, declarative dataflow & compensation
@@ -60,7 +71,7 @@ Deputy/
 
 ---
 
-## 3. The 37 Security Invariants
+## 2. The 37 Security Invariants
 
 1. **No DOM Macros**: Canonical learned capabilities are always semantic application commands.
 2. **Trusted ActionRegistry Only**: Execution bindings route exclusively to registered handlers.
@@ -102,7 +113,7 @@ Deputy/
 
 ---
 
-## 4. Verification & Testing
+## 3. Verification & Testing
 
 ```bash
 # 1. Typecheck across all 10 packages & apps (0 errors)
@@ -114,7 +125,7 @@ pnpm lint
 # 3. Format check
 pnpm format:check
 
-# 4. Run all 168 Vitest unit & integration tests
+# 4. Run all 175 Vitest unit & integration tests
 pnpm test
 
 # 5. Build production bundles for all packages and apps
@@ -129,7 +140,7 @@ pnpm test:e2e
 
 ---
 
-## 5. Quickstart & Local Development
+## 4. Quickstart & Local Development
 
 ```bash
 # Install dependencies
