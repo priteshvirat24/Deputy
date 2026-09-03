@@ -248,8 +248,8 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
 
     // 4. Update Action Trace Spline
     if (actionTraceRef.current) {
-      const isTraceActive = scene.id === 'LEARN' || scene.id === 'REJECT';
-      actionTraceRef.current.setTamperMode(scene.id === 'REJECT');
+      const isTraceActive = scene.id === 'DEMONSTRATE' || scene.id === 'TAMPER_REJECTION';
+      actionTraceRef.current.setTamperMode(scene.id === 'TAMPER_REJECTION');
       actionTraceRef.current.update(sceneProgress, isTraceActive);
     }
 
@@ -260,7 +260,7 @@ export const TrustCoreScene: React.FC<TrustCoreSceneProps> = ({
 
     // 6. Update Audit Chain
     if (auditChainRef.current) {
-      const isAuditActive = scene.id === 'AUDIT';
+      const isAuditActive = scene.id === 'ARCHITECTURE';
       auditChainRef.current.update(sceneProgress, isAuditActive);
     }
   }, [currentTime]);

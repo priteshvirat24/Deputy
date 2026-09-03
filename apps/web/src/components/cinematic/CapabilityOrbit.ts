@@ -115,7 +115,7 @@ export class CapabilityOrbit {
       (this.ring2.material as THREE.LineBasicMaterial).color.setHex(0x06b6d4);
       (this.ring1.material as THREE.LineBasicMaterial).opacity = 0.6;
       (this.authShieldRing.material as THREE.LineBasicMaterial).opacity = 0.0;
-    } else if (sceneId === 'REJECT') {
+    } else if (sceneId === 'TAMPER_REJECTION') {
       this.group.visible = true;
       (this.ring1.material as THREE.LineBasicMaterial).color.setHex(0xf43f5e);
       (this.ring2.material as THREE.LineBasicMaterial).color.setHex(0xf43f5e);

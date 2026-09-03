@@ -12,6 +12,7 @@ import { DeputyCinematicExperience } from './components/cinematic/DeputyCinemati
 import { ToastProvider, useToast } from './context/ToastContext.js';
 
 // Pages
+import { LandingPageView } from './pages/LandingPageView.js';
 import { DashboardView } from './pages/DashboardView.js';
 import { OperationsConsoleView } from './pages/OperationsConsoleView.js';
 import { DemonstrationsView } from './pages/DemonstrationsView.js';
@@ -27,7 +28,7 @@ import { SettingsView } from './pages/SettingsView.js';
 
 const AppInner: React.FC = () => {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('landing');
   const [tools, setTools] = useState<LearnedTool[]>([]);
   const [demonstrations, setDemonstrations] = useState<Demonstration[]>([]);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
@@ -222,6 +223,40 @@ const AppInner: React.FC = () => {
   const pendingAuthCount = authorizations.filter(a => a.status === 'PENDING').length;
   const activeToolCount = tools.filter(t => t.status === 'ACTIVE').length;
 
+  // 1. Full Editorial Landing Page View
+  if (activeTab === 'landing') {
+    return (
+      <>
+        <LandingPageView
+          tools={tools}
+          demonstrations={demonstrations}
+          auditEvents={auditEvents}
+          onEnterJudgeMode={() => setIsCinematicOpen(true)}
+          onEnterApp={() => setActiveTab('dashboard')}
+        />
+
+        {/* Global ⌘K Command Palette */}
+        <CommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={() => setIsCommandPaletteOpen(false)}
+          onSelectTab={tab => setActiveTab(tab)}
+          onOpenCinematic={() => setIsCinematicOpen(true)}
+          tools={tools}
+          demonstrations={demonstrations}
+          auditEvents={auditEvents}
+          authorizations={authorizations}
+        />
+
+        {/* 3D Cinematic Judge Experience Modal (Three.js WebGL Film) */}
+        <DeputyCinematicExperience
+          isOpen={isCinematicOpen}
+          onClose={() => setIsCinematicOpen(false)}
+        />
+      </>
+    );
+  }
+
+  // 2. Full Administrative Operator App Shell
   return (
     <div className="app-container">
       {/* Sidebar Navigation */}

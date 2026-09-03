@@ -14,9 +14,11 @@ import {
   Settings,
   Shield,
   Film,
+  Globe,
 } from 'lucide-react';
 
 export type ActiveTab =
+  | 'landing'
   | 'dashboard'
   | 'operations'
   | 'demonstrations'
@@ -49,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <aside className="sidebar">
       {/* Brand Header */}
       <div className="sidebar-header">
-        <div className="brand">
+        <div className="brand" onClick={() => onSelectTab('landing')} style={{ cursor: 'pointer' }}>
           <div className="brand-icon">
             <Shield size={18} />
           </div>
@@ -62,11 +64,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Nav Groups */}
       <ul className="nav-groups">
-        {/* CINEMATIC STORY EXPERIENCE */}
-        {onOpenCinematic && (
-          <li>
-            <div className="nav-group-label">EXPERIENCE</div>
-            <ul className="nav-items">
+        {/* OVERVIEW & STORY */}
+        <li>
+          <div className="nav-group-label">OVERVIEW</div>
+          <ul className="nav-items">
+            <li
+              className={`nav-item ${activeTab === 'landing' ? 'active' : ''}`}
+              onClick={() => onSelectTab('landing')}
+            >
+              <Globe size={15} className="nav-icon" style={{ color: '#38bdf8' }} />
+              <span>Landing & 3D Core</span>
+            </li>
+            {onOpenCinematic && (
               <li
                 className="nav-item"
                 onClick={onOpenCinematic}
@@ -78,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
               >
                 <Film size={15} className="nav-icon" style={{ color: '#818cf8' }} />
-                <span style={{ fontWeight: 600 }}>3D Cinematic Film</span>
+                <span style={{ fontWeight: 600 }}>Judge Mode Film</span>
                 <span
                   className="mono"
                   style={{
@@ -90,12 +99,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     marginLeft: 'auto',
                   }}
                 >
-                  35s
+                  38s
                 </span>
               </li>
-            </ul>
-          </li>
-        )}
+            )}
+          </ul>
+        </li>
 
         {/* COMMAND */}
         <li>

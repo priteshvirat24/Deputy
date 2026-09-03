@@ -1,5 +1,13 @@
 export type SceneId =
-  'HOOK' | 'LEARN' | 'SYNTHESIZE' | 'AUTHORIZE' | 'EXECUTE' | 'REJECT' | 'AUDIT' | 'OUTRO';
+  | 'INTRO'
+  | 'DEMONSTRATE'
+  | 'SYNTHESIZE'
+  | 'SCHEMA'
+  | 'AUTHORIZE'
+  | 'EXECUTE'
+  | 'TAMPER_REJECTION'
+  | 'ARCHITECTURE'
+  | 'FINALE';
 
 export interface SceneDefinition {
   id: SceneId;
@@ -19,18 +27,18 @@ export interface SceneDefinition {
   glowColor: string;
 }
 
-export const TOTAL_DURATION = 38; // 38 seconds total runtime
+export const TOTAL_DURATION = 38.0; // Exactly 38 seconds target runtime
 
 export const SCENES: SceneDefinition[] = [
   {
-    id: 'HOOK',
+    id: 'INTRO',
     index: 0,
     startTime: 0,
-    endTime: 4.5,
-    duration: 4.5,
+    endTime: 3.5,
+    duration: 3.5,
     title: 'DEPUTY',
-    tagline: 'LEARN. SYNTHESIZE. EXECUTE.',
-    supporting: 'Trust is not assumed. It is engineered.',
+    tagline: 'AI learns from demonstrations.',
+    supporting: 'But learning is not permission.',
     technicalLabel: 'CAPABILITY TRUST CORE · INITIALIZING',
     semanticColor: '#818cf8', // Electric Violet
     cameraPosition: { x: 0, y: 1.2, z: 9.5 },
@@ -40,17 +48,17 @@ export const SCENES: SceneDefinition[] = [
     glowColor: '#6366f1',
   },
   {
-    id: 'LEARN',
+    id: 'DEMONSTRATE',
     index: 1,
-    startTime: 4.5,
-    endTime: 10,
-    duration: 5.5,
-    title: 'LEARN FROM REAL OPERATIONS',
-    tagline: 'Capture. Understand. Generalize.',
-    supporting: 'DEPUTY records semantic application calls, not pixels or fragile DOM macros.',
+    startTime: 3.5,
+    endTime: 7.5,
+    duration: 4.0,
+    title: 'DEMONSTRATE',
+    tagline: 'Semantic actions, not pixels or DOM macros.',
+    supporting: 'DEPUTY records real business calls: customer.create and invoice.create.',
     technicalLabel: 'ACTION_REGISTRY · INGESTING DEMONSTRATIONS',
     semanticColor: '#06b6d4', // Cyan
-    cameraPosition: { x: 3.5, y: 1.8, z: 7.2 },
+    cameraPosition: { x: 3.2, y: 1.5, z: 7.2 },
     cameraTarget: { x: 0, y: 0, z: 0 },
     coreColor: '#06b6d4',
     coreIntensity: 1.2,
@@ -59,33 +67,52 @@ export const SCENES: SceneDefinition[] = [
   {
     id: 'SYNTHESIZE',
     index: 2,
-    startTime: 10,
-    endTime: 16,
-    duration: 6.0,
-    title: 'SYNTHESIZE CAPABILITIES',
+    startTime: 7.5,
+    endTime: 12.0,
+    duration: 4.5,
+    title: 'SYNTHESIZE',
     tagline: 'Deterministic. Explainable. Repeatable.',
-    supporting: 'Variational parameter inference extracts intent while discarding volatile noise.',
-    technicalLabel: 'SYNTHESIS_ENGINE · JSON_SCHEMA CRYSTALLIZATION',
+    supporting:
+      'Variational parameter inference extracts intent while discarding volatile timestamps and nonces.',
+    technicalLabel: 'SYNTHESIS_ENGINE · PARAMETER INFERENCE',
     semanticColor: '#a855f7', // Electric Violet
-    cameraPosition: { x: -3.2, y: 2.2, z: 6.8 },
+    cameraPosition: { x: -3.0, y: 2.0, z: 6.8 },
     cameraTarget: { x: 0, y: 0.1, z: 0 },
     coreColor: '#c084fc',
     coreIntensity: 1.6,
     glowColor: '#9333ea',
   },
   {
-    id: 'AUTHORIZE',
+    id: 'SCHEMA',
     index: 3,
-    startTime: 16,
-    endTime: 22,
-    duration: 6.0,
-    title: 'HUMAN AUTHORIZATION',
-    tagline: 'The machine proposes, the human authorizes.',
+    startTime: 12.0,
+    endTime: 17.0,
+    duration: 5.0,
+    title: 'STRICT CONTRACT',
+    tagline: 'No arbitrary code. Only declarative capability metadata.',
     supporting:
-      'High-risk and monetary actions require hardware-backed WebAuthn User Verification.',
-    technicalLabel: 'FIDO2 / WEBAUTHN · EXACT ARGUMENT BINDING',
+      'JSON Schema with additionalProperties: false guarantees the model cannot escape parameter bounds.',
+    technicalLabel: 'JSON_SCHEMA · STRICT CONTRACT BINDING',
+    semanticColor: '#38bdf8', // Sky Blue
+    cameraPosition: { x: 0, y: 1.0, z: 5.5 },
+    cameraTarget: { x: 0, y: 0, z: 0 },
+    coreColor: '#38bdf8',
+    coreIntensity: 1.5,
+    glowColor: '#0284c7',
+  },
+  {
+    id: 'AUTHORIZE',
+    index: 4,
+    startTime: 17.0,
+    endTime: 23.0,
+    duration: 6.0,
+    title: 'PROPOSE ≠ AUTHORIZE',
+    tagline: 'High-risk execution requires explicit human approval.',
+    supporting:
+      'FIDO2 WebAuthn User Verification cryptographically seals the canonical SHA-256 parameter digest.',
+    technicalLabel: 'WEBAUTHN · EXACT ARGUMENT BINDING',
     semanticColor: '#818cf8', // Electric Violet
-    cameraPosition: { x: 0, y: 0.9, z: 6.0 },
+    cameraPosition: { x: 0, y: 0.8, z: 6.0 },
     cameraTarget: { x: 0, y: 0, z: 0 },
     coreColor: '#818cf8',
     coreIntensity: 1.8,
@@ -93,64 +120,66 @@ export const SCENES: SceneDefinition[] = [
   },
   {
     id: 'EXECUTE',
-    index: 4,
-    startTime: 22,
-    endTime: 27.5,
-    duration: 5.5,
-    title: 'EXECUTE WITH CONFIDENCE',
-    tagline: 'Verified capability. Controlled execution.',
-    supporting: 'Single-use cryptographic tokens route securely through native ActionRegistry.',
-    technicalLabel: 'WEBMCP RUNTIME · EXECUTION_SUCCESS (VERIFIED)',
+    index: 5,
+    startTime: 23.0,
+    endTime: 28.0,
+    duration: 5.0,
+    title: 'EXECUTE ONLY WHAT WAS AUTHORIZED',
+    tagline: 'Verified capability. Single-use execution.',
+    supporting:
+      'Token is atomically consumed and routes exclusively to registered native application handlers.',
+    technicalLabel: 'WEBMCP RUNTIME · VERIFIED EXECUTION',
     semanticColor: '#10b981', // Emerald
-    cameraPosition: { x: 2.8, y: -0.6, z: 6.5 },
+    cameraPosition: { x: 2.6, y: -0.5, z: 6.5 },
     cameraTarget: { x: 0, y: 0, z: 0 },
     coreColor: '#10b981',
     coreIntensity: 2.0,
     glowColor: '#059669',
   },
   {
-    id: 'REJECT',
-    index: 5,
-    startTime: 27.5,
-    endTime: 32.5,
-    duration: 5.0,
+    id: 'TAMPER_REJECTION',
+    index: 6,
+    startTime: 28.0,
+    endTime: 32.0,
+    duration: 4.0,
     title: 'TAMPER REJECTION',
     tagline: 'ARGUMENT DIGEST MISMATCH · EXECUTION BLOCKED',
     supporting:
-      'Mutating parameters from ₹2,500 to ₹5,000 invalidates the canonical SHA-256 digest.',
-    technicalLabel: 'SECURITY_GATE · FAIL-CLOSED DETERMINISTIC REFUSAL',
+      'Mutating parameters from ₹2,500 to ₹5,000 invalidates the signature. Fail-closed rejection.',
+    technicalLabel: 'SECURITY_GATE · DETERMINISTIC REFUSAL',
     semanticColor: '#f43f5e', // Coral / Red
-    cameraPosition: { x: -2.2, y: 0.4, z: 5.8 },
+    cameraPosition: { x: -2.0, y: 0.4, z: 5.8 },
     cameraTarget: { x: 0, y: 0, z: 0 },
     coreColor: '#f43f5e',
     coreIntensity: 2.4,
     glowColor: '#e11d48',
   },
   {
-    id: 'AUDIT',
-    index: 6,
-    startTime: 32.5,
-    endTime: 36,
-    duration: 3.5,
+    id: 'ARCHITECTURE',
+    index: 7,
+    startTime: 32.0,
+    endTime: 35.0,
+    duration: 3.0,
     title: 'EVERY ACTION LEAVES PROOF',
     tagline: 'Append-only. Cryptographically verifiable.',
-    supporting: 'Every decision and execution is permanently sealed in an immutable hash chain.',
-    technicalLabel: 'GENESIS_LINKED · SHA-256 AUDIT LEDGER',
-    semanticColor: '#38bdf8', // Slate Blue / Cyan
-    cameraPosition: { x: 0, y: 2.5, z: 10.5 },
+    supporting:
+      'WebMCP, WebAuthn, ActionRegistry, Quarantine, and Audit operate as synchronized security layers.',
+    technicalLabel: 'GENESIS_LINKED · IMMUTABLE SHA-256 AUDIT',
+    semanticColor: '#38bdf8', // Slate Blue
+    cameraPosition: { x: 0, y: 2.2, z: 10.0 },
     cameraTarget: { x: 0, y: -0.2, z: 0 },
     coreColor: '#38bdf8',
-    coreIntensity: 1.3,
+    coreIntensity: 1.4,
     glowColor: '#0284c7',
   },
   {
-    id: 'OUTRO',
-    index: 7,
-    startTime: 36,
-    endTime: 38,
-    duration: 2.0,
+    id: 'FINALE',
+    index: 8,
+    startTime: 35.0,
+    endTime: 38.0,
+    duration: 3.0,
     title: 'DEPUTY',
-    tagline: 'TRUSTED BY DESIGN.',
+    tagline: 'Learn the workflow. Keep the boundary.',
     supporting: 'Built for the age of agentic operations.',
     technicalLabel: 'DEPUTY PLATFORM · ACTIVE & ENFORCED',
     semanticColor: '#818cf8',
