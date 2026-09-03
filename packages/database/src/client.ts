@@ -7,6 +7,10 @@ export function createDatabaseClient(connectionUrl: string) {
     max: 10,
     idle_timeout: 20,
     connect_timeout: 10,
+    // Disable prepared statements so the client works through Supabase's
+    // Supavisor connection pooler in either session or transaction mode
+    // (transaction mode rejects the extended/prepared protocol).
+    prepare: false,
   });
 
   const db = drizzle(queryClient, { schema });
