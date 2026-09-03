@@ -36,7 +36,7 @@ Deputy/
 │   ├── domain/                 # Pure domain models (Demonstration, LearnedTool, Authorization, WebAuthn, Quarantine, ExecutionOutcome)
 │   ├── schemas/                # Zod runtime schemas & validation for all models & endpoints
 │   ├── synthesis/              # Deterministic demonstration recording, trace alignment & parameter inference
-│   ├── webmcp/                 # Native browser WebMCP adapter (navigator.modelContext), lifecycle & abort signals
+│   ├── webmcp/                 # Native browser WebMCP adapter (document.modelContext), lifecycle & abort signals
 │   ├── security/               # WebAuthn service, challenge store, QUARANTINE boundary, origin validator, nonce manager
 │   ├── database/               # PostgreSQL schema (Drizzle ORM), migrations, repositories, and atomic concurrency guards
 │   └── config/                 # Strict environment validation contract and security constants

@@ -22,7 +22,7 @@ ToolDescriptorTranslator (Validates schema & creates trusted execution closure)
 WebMCPAdapter.registerTool(...)
        │
        ▼
-navigator.modelContext.registerTool(...) / window.webMCP.registerTool(...)
+document.modelContext.registerTool(descriptor, { signal })   [resolved host]
        │
        ▼
 Agent receives 'toolchange' event and discovers 'create_customer_with_invoice'
@@ -54,7 +54,7 @@ A common vulnerability in automated learning systems is arbitrary code generatio
 Tool lifecycle states:
 
 - `DRAFT`: Under review, not exposed to WebMCP.
-- `ACTIVE`: Registered and callable via `navigator.modelContext`.
+- `ACTIVE`: Registered and callable via `document.modelContext`.
 - `DISABLED` / `RETIRED` / `DELETED`: Immediately de-registered.
 
 ### Instant In-Flight Cancellation
@@ -63,10 +63,14 @@ When an administrator retires or disables a tool (`adapter.retireTool(toolId)`):
 
 1. The tool's dedicated `AbortController` triggers `abort('Tool retired by lifecycle governance')`.
 2. Any in-flight execution asynchronously halts via the linked `AbortSignal`.
-3. The tool is removed from active registrations.
-4. If native browser APIs are present, `navigator.modelContext.unregisterTool(name)` is called.
-5. A `toolchange` event (`action: 'RETIRED'`) is broadcast to subscribers.
-6. Any subsequent invocation returns a structured refusal: `TOOL_RETIRED`.
+3. Because that same `AbortSignal` was handed to the host at registration
+   (`registerTool(descriptor, { signal })`), aborting it removes the descriptor
+   from the WebMCP surface — this is the spec-canonical retirement mechanism.
+4. The tool is removed from DEPUTY's active registrations.
+5. Only for legacy polyfills whose `registerTool` never accepted a signal does
+   DEPUTY fall back to calling `unregisterTool(name)`.
+6. A `toolchange` event (`action: 'RETIRED'`) is broadcast to subscribers.
+7. Any subsequent invocation returns a structured refusal: `TOOL_RETIRED`.
 
 ---
 
@@ -74,5 +78,7 @@ When an administrator retires or disables a tool (`adapter.retireTool(toolId)`):
 
 DEPUTY supports multiple runtime environments without crashing:
 
-- **Native Browser**: Binds directly to `navigator.modelContext` or `window.webMCP`.
+- **Native Browser**: Binds to the host located by `resolveModelContext()` —
+  `document.modelContext` (canonical), the deprecated `navigator.modelContext`
+  alias, or the `window.webMCP` polyfill, in that order.
 - **Headless / Node.js / SSR / Vitest**: Automatically falls back to an in-memory capability provider (`provider: 'NONE'`), allowing full verification in headless CI/CD without polyfills.

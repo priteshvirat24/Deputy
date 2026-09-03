@@ -1,50 +1,35 @@
+import { resolveModelContext } from './host.js';
 import { WebMCPCapabilities } from './types.js';
 
 /**
- * Detect runtime WebMCP capabilities in the current host environment.
- * Gracefully handles Node.js, standard browsers, or WebMCP-enabled browsers
- * without throwing exceptions (Invariant 10 / Test 10).
+ * Report runtime WebMCP capabilities for the current host.
+ * Delegates location to `resolveModelContext()` so there is exactly one place
+ * in the codebase that knows where the host object lives.
+ *
+ * Never throws — Node.js, a plain browser, and a WebMCP browser all return a
+ * capability report rather than an exception (Invariant 16 / Test 10).
  */
 export function detectWebMCPSupport(): WebMCPCapabilities {
-  try {
-    // Check if we are in an environment with a global window or navigator
-    const globalScope =
-      typeof globalThis !== 'undefined' ? (globalThis as Record<string, unknown>) : null;
+  const resolved = resolveModelContext();
 
-    if (!globalScope) {
-      return {
-        available: false,
-        provider: 'NONE',
-        reason: 'No global execution environment detected.',
-      };
-    }
-
-    // Check for native navigator.modelContext or window.webMCP
-    const navigatorObj = (globalScope['navigator'] as Record<string, unknown>) || null;
-    const modelContext = (navigatorObj?.['modelContext'] || globalScope['webMCP']) as Record<
-      string,
-      unknown
-    > | null;
-
-    if (modelContext && typeof modelContext['registerTool'] === 'function') {
-      return {
-        available: true,
-        provider: 'NATIVE_BROWSER',
-        version: typeof modelContext['version'] === 'string' ? modelContext['version'] : '1.0.0',
-      };
-    }
-
+  if (!resolved.host) {
     return {
       available: false,
       provider: 'NONE',
-      reason:
-        'Browser does not expose native WebMCP API (navigator.modelContext). Fallback mode active.',
-    };
-  } catch (err: unknown) {
-    return {
-      available: false,
-      provider: 'NONE',
-      reason: `WebMCP feature detection error: ${err instanceof Error ? err.message : String(err)}`,
+      location: 'none',
+      deprecatedAlias: false,
+      supportsSignalRetirement: false,
+      reason: resolved.reason,
     };
   }
+
+  return {
+    available: true,
+    provider: resolved.location === 'window.webMCP' ? 'POLYFILL' : 'NATIVE_BROWSER',
+    location: resolved.location,
+    deprecatedAlias: resolved.deprecatedAlias,
+    supportsSignalRetirement: resolved.supportsRegistrationOptions,
+    version: resolved.version ?? '1.0.0',
+    reason: resolved.reason,
+  };
 }
