@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LearnedTool } from '@deputy/domain';
 import { Play, Eye, ShieldCheck, Key } from 'lucide-react';
 import { PasskeyAuthModal } from '../components/PasskeyAuthModal.js';
+import { recordProposal, recordResponse } from '../lib/agentEye.js';
 
 interface ToolsViewProps {
   tools: LearnedTool[];
@@ -39,21 +40,25 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ tools, onRefresh }) => {
         headers['x-deputy-authorization-id'] = authorizationId;
       }
 
-      const res = await fetch('http://localhost:4000/api/tool-proposals', {
+      const proposal = {
+        proposalId: `prop_ui_${Date.now()}`,
+        toolId: tool.toolId,
+        toolVersion: tool.version,
+        arguments: defaultArgs,
+        requestId,
+        proposedBy: { agentId: 'lead_autonomous_agent', origin: window.location.origin },
+        timestamp: new Date().toISOString(),
+      };
+      recordProposal(proposal);
+
+      const res = await fetch('/api/tool-proposals', {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          proposalId: `prop_ui_${Date.now()}`,
-          toolId: tool.toolId,
-          toolVersion: tool.version,
-          arguments: defaultArgs,
-          requestId,
-          proposedBy: { agentId: 'lead_autonomous_agent', origin: window.location.origin },
-          timestamp: new Date().toISOString(),
-        }),
+        body: JSON.stringify(proposal),
       });
 
       const data = await res.json();
+      recordResponse(data);
       setTestResult(JSON.stringify(data, null, 2));
 
       // If policy demands human authorization, prompt passkey ceremony
@@ -98,7 +103,7 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ tools, onRefresh }) => {
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Active Capabilities Surface</h3>
             <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
               Tools currently registered in the browser Model Context API
-              (`navigator.modelContext`).
+              (`document.modelContext`).
             </div>
           </div>
           <button className="btn btn-secondary" onClick={onRefresh}>

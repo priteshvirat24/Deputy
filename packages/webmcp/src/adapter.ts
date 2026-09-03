@@ -1,5 +1,6 @@
 import { LearnedTool } from '@deputy/domain';
 import { detectWebMCPSupport } from './feature-detection.js';
+import { ModelContextLocation, resolveModelContext } from './host.js';
 import { ExecutionDispatcher, ToolDescriptorTranslator } from './tool-descriptor.js';
 import {
   RegisteredToolRecord,
@@ -76,17 +77,18 @@ export class WebMCPAdapter {
       abortController,
     );
 
+    // Hand the registration (with its abort signal) to the live host, if any.
+    const hostLocation = this.syncWithBrowserHost(definition, abortController.signal);
+
     const record: RegisteredToolRecord = {
       tool,
       definition,
       abortController,
       registeredAt: new Date(),
+      hostLocation,
     };
 
     this.registeredTools.set(tool.toolId, record);
-
-    // If native browser ModelContext API is available, register dynamically
-    this.syncWithBrowserHost(definition);
 
     this.notifySubscribers({
       type: 'toolchange',
@@ -111,12 +113,14 @@ export class WebMCPAdapter {
       return false;
     }
 
-    // Invariant: abort in-flight executions
+    // Invariant #14: retirement aborts the AbortSignal handed to the host at
+    // registration. On a standard host that alone removes the tool from the
+    // surface and cancels in-flight executions.
     record.abortController.abort(reason || `Tool ${action.toLowerCase()} by lifecycle governance.`);
     this.registeredTools.delete(toolId);
 
-    // If native browser ModelContext API is available, unregister dynamically
-    this.removeBrowserHostRegistration(record.tool.name);
+    // Legacy polyfills that never accepted the signal need an explicit removal.
+    this.removeBrowserHostRegistration(record);
 
     this.notifySubscribers({
       type: 'toolchange',
@@ -206,45 +210,50 @@ export class WebMCPAdapter {
     return this.registeredTools.get(toolId)?.tool;
   }
 
-  private syncWithBrowserHost(definition: WebMCPToolDefinition): void {
+  /**
+   * Hand a registration to the live WebMCP host, located through the single
+   * `resolveModelContext()` resolver. Standard hosts receive the abort signal
+   * in the options bag so retirement propagates by aborting it. Legacy
+   * polyfills that predate the options bag are called positionally.
+   *
+   * Returns where the registration was actually placed, or 'none'.
+   */
+  private syncWithBrowserHost(
+    definition: WebMCPToolDefinition,
+    signal: AbortSignal,
+  ): ModelContextLocation {
+    const resolved = resolveModelContext();
+    if (!resolved.host?.registerTool) return 'none';
+
     try {
-      if (typeof navigator !== 'undefined') {
-        const mc = (
-          navigator as unknown as { modelContext?: { registerTool?: (def: unknown) => void } }
-        ).modelContext;
-        if (typeof mc?.registerTool === 'function') {
-          mc.registerTool(definition);
-        }
-      } else if (typeof window !== 'undefined') {
-        const wm = (window as unknown as { webMCP?: { registerTool?: (def: unknown) => void } })
-          .webMCP;
-        if (typeof wm?.registerTool === 'function') {
-          wm.registerTool(definition);
-        }
+      if (resolved.supportsRegistrationOptions) {
+        resolved.host.registerTool(definition, { signal });
+      } else {
+        resolved.host.registerTool(definition);
       }
+      return resolved.location;
     } catch {
-      // Gracefully handle browser host registration exceptions
+      // A host may reject or throw; degrade to internal-only registration.
+      return 'none';
     }
   }
 
-  private removeBrowserHostRegistration(toolName: string): void {
+  /**
+   * Fallback removal for hosts that could not observe the abort signal. Standard
+   * hosts retire via the aborted signal alone, so this is a no-op for them —
+   * `unregisterTool` is not part of the standard surface and may be absent.
+   */
+  private removeBrowserHostRegistration(record: RegisteredToolRecord): void {
+    if (record.hostLocation === 'none') return;
+
+    const resolved = resolveModelContext();
+    // Signal-capable hosts already removed the tool when we aborted its signal.
+    if (resolved.supportsRegistrationOptions || !resolved.host?.unregisterTool) return;
+
     try {
-      if (typeof navigator !== 'undefined') {
-        const mc = (
-          navigator as unknown as { modelContext?: { unregisterTool?: (name: string) => void } }
-        ).modelContext;
-        if (typeof mc?.unregisterTool === 'function') {
-          mc.unregisterTool(toolName);
-        }
-      } else if (typeof window !== 'undefined') {
-        const wm = (window as unknown as { webMCP?: { unregisterTool?: (name: string) => void } })
-          .webMCP;
-        if (typeof wm?.unregisterTool === 'function') {
-          wm.unregisterTool(toolName);
-        }
-      }
+      resolved.host.unregisterTool(record.tool.name);
     } catch {
-      // Gracefully handle browser host unregistration exceptions
+      // Gracefully handle legacy host unregistration exceptions.
     }
   }
 

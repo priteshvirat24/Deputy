@@ -46,7 +46,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       setDemoStep(4);
       setDemoLog(prev => [
         ...prev,
-        'Step 4: Tool activated and dynamically registered in browser WebMCP (navigator.modelContext)...',
+        'Step 4: Tool activated and dynamically registered in browser WebMCP (document.modelContext)...',
       ]);
 
       await new Promise(r => setTimeout(r, 800));

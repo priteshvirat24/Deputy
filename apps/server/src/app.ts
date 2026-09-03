@@ -15,6 +15,7 @@ import { createSynthesisRoutes } from './routes/synthesis.js';
 import { createToolRoutes } from './routes/tools.js';
 import { createWebAuthnRoutes } from './routes/webauthn.js';
 import { AppServices, initializeServices } from './services/index.js';
+import { mountStaticSpa } from './static.js';
 
 export function createApp(customServices?: AppServices) {
   const env = getEnv();
@@ -68,7 +69,12 @@ export function createApp(customServices?: AppServices) {
   app.route('/api/auth/webauthn', createWebAuthnRoutes(services));
   app.route('/api/audit', createAuditRoutes(services));
 
-  // 4. Structured Error Handler
+  // 4. Optional single-origin SPA serving (WebAuthn RP/origin agreement).
+  if (env.SERVE_STATIC) {
+    mountStaticSpa(app, env);
+  }
+
+  // 5. Structured Error Handler
   app.onError(structuredErrorHandler);
 
   return { app, services };

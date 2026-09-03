@@ -40,6 +40,16 @@ export const envSchema = z
       .transform(val => val === 'true')
       .or(z.boolean())
       .default(false),
+    // Serve the built SPA from this server at a single origin (WebAuthn needs
+    // RP ID / origin agreement, which same-origin serving guarantees). Local
+    // `pnpm dev` leaves this false and uses the Vite proxy instead.
+    SERVE_STATIC: z
+      .string()
+      .transform(val => val === 'true')
+      .or(z.boolean())
+      .default(false),
+    // Absolute path to the built web client (apps/web/dist) when SERVE_STATIC.
+    STATIC_DIR: z.string().optional(),
     LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   })
   .superRefine((data, ctx) => {
@@ -70,6 +80,30 @@ export const envSchema = z
           path: ['REDIS_URL'],
           message: 'REDIS_URL is required when RATE_LIMIT_BACKEND is set to redis.',
         });
+      }
+
+      // 4. WebAuthn requires a real RP ID and a secure origin. A production
+      // single-origin deploy whose RP_ID is localhost, or whose origins are
+      // non-HTTPS, would pass locally and then silently fail the passkey
+      // ceremony on the deployed build. Fail loudly at startup instead.
+      const isLocalhostRpId = /^(localhost|127\.0\.0\.1|\[?::1\]?)$/i.test(data.RP_ID);
+      if (isLocalhostRpId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['RP_ID'],
+          message:
+            'In production, RP_ID cannot be localhost/127.0.0.1. Set it to the deployed apex domain (e.g. deputy.example.com).',
+        });
+      }
+      for (const key of ['WEBAUTHN_ORIGIN', 'ORIGIN'] as const) {
+        const value = data[key];
+        if (!value.startsWith('https://')) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [key],
+            message: `In production, ${key} must be an https:// URL (WebAuthn requires a secure context). Got: ${value}`,
+          });
+        }
       }
     }
   });
