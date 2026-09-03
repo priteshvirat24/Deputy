@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Circle, Pause, Play, CheckCircle, Trash2, Video } from 'lucide-react';
+import { Circle, Pause, Play, CheckCircle, Trash2, Video, Terminal } from 'lucide-react';
+
+export interface RecordedActionItem {
+  actionType: string;
+  summary: string;
+  sequenceNumber: number;
+  timestamp: string;
+}
 
 export interface ActiveRecordingState {
   demonstrationId: string;
@@ -8,6 +15,7 @@ export interface ActiveRecordingState {
   status: 'RECORDING' | 'PAUSED';
   startedAt: number;
   actionCount: number;
+  actionTrace?: RecordedActionItem[];
   lastAction?: { actionType: string; summary: string };
 }
 
@@ -30,7 +38,7 @@ export const RecordingBar: React.FC<RecordingBarProps> = ({
 }) => {
   const [elapsed, setElapsed] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [taskInput, setTaskInput] = useState('');
+  const [taskInput, setTaskInput] = useState('Create Customer and Bill Initial Invoice');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -56,7 +64,6 @@ export const RecordingBar: React.FC<RecordingBarProps> = ({
     try {
       await onStart(taskInput.trim());
       setShowModal(false);
-      setTaskInput('');
     } finally {
       setLoading(false);
     }
@@ -64,74 +71,101 @@ export const RecordingBar: React.FC<RecordingBarProps> = ({
 
   if (!recording) {
     return (
-      <div
-        style={{
-          background: 'rgba(15, 23, 42, 0.75)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          padding: '10px 24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#64748b' }} />
-          <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-            Demonstration Recorder is idle. Demonstrate a task in Operations Console to teach
-            DEPUTY.
-          </span>
+      <>
+        <div
+          style={{
+            background: 'var(--surface-1)',
+            borderBottom: '1px solid var(--border-subtle)',
+            padding: '10px 24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            position: 'sticky',
+            top: 52,
+            zIndex: 30,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: 'var(--text-disabled)',
+              }}
+            />
+            <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              Demonstration Recorder: <strong style={{ color: 'var(--text-primary)' }}>IDLE</strong>{' '}
+              · Perform enterprise actions to capture a semantic demonstration trace.
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => setShowModal(true)}
+            style={{ gap: 6 }}
+          >
+            <Video size={13} />
+            <span>Start Demonstration</span>
+          </button>
         </div>
 
-        <button
-          className="btn btn-primary"
-          style={{ padding: '6px 14px', fontSize: '0.82rem', gap: '6px' }}
-          onClick={() => setShowModal(true)}
-        >
-          <Video size={14} /> Start Demonstration
-        </button>
-
         {showModal && (
-          <div className="modal-overlay">
-            <div className="modal" style={{ maxWidth: '440px' }}>
-              <div className="modal-header">
-                <h3>Start New Demonstration</h3>
+          <div
+            className="drawer-backdrop"
+            style={{ justifyContent: 'center', alignItems: 'center', padding: 20 }}
+            onClick={e => {
+              if (e.target === e.currentTarget) setShowModal(false);
+            }}
+          >
+            <div
+              className="panel"
+              style={{
+                width: 480,
+                maxWidth: '100%',
+                marginBottom: 0,
+                boxShadow: 'var(--shadow-lg)',
+              }}
+            >
+              <div className="panel-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Video size={16} style={{ color: 'var(--semantic-recording)' }} />
+                  <span className="panel-title">Start Task Demonstration</span>
+                </div>
                 <button
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    cursor: 'pointer',
-                  }}
+                  type="button"
+                  className="btn btn-secondary btn-sm"
                   onClick={() => setShowModal(false)}
                 >
                   ✕
                 </button>
               </div>
-              <form onSubmit={handleStartSubmit}>
-                <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '14px' }}>
-                  Demonstrate a task by performing real operations. DEPUTY will capture the semantic
-                  trace without scraping the DOM.
+
+              <form onSubmit={handleStartSubmit} style={{ padding: 20 }}>
+                <p
+                  style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 16 }}
+                >
+                  Demonstrate a multi-step task by executing real application actions in the
+                  Operations Console. DEPUTY records semantic application calls, not pixels or
+                  fragile DOM macros.
                 </p>
+
                 <div className="form-group">
-                  <label className="form-label">Task Description</label>
+                  <label className="form-label">Task Objective / Description</label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="e.g. Create customer and bill initial invoice"
                     value={taskInput}
                     onChange={e => setTaskInput(e.target.value)}
+                    placeholder="e.g. Create Customer and Bill Initial Invoice"
                     required
                     autoFocus
                   />
                 </div>
+
                 <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: '10px',
-                    marginTop: '16px',
-                  }}
+                  style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}
                 >
                   <button
                     type="button"
@@ -140,15 +174,15 @@ export const RecordingBar: React.FC<RecordingBarProps> = ({
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary" disabled={loading}>
-                    {loading ? 'Starting...' : 'Begin Recording'}
+                  <button type="submit" className="btn btn-accent" disabled={loading}>
+                    {loading ? 'Starting...' : 'Begin Live Recording'}
                   </button>
                 </div>
               </form>
             </div>
           </div>
         )}
-      </div>
+      </>
     );
   }
 
@@ -157,110 +191,188 @@ export const RecordingBar: React.FC<RecordingBarProps> = ({
   return (
     <div
       style={{
-        background: isPaused ? 'rgba(120, 53, 15, 0.4)' : 'rgba(69, 10, 10, 0.4)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: `1px solid ${isPaused ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+        background: isPaused ? 'rgba(245, 158, 11, 0.08)' : 'rgba(244, 63, 94, 0.08)',
+        borderBottom: `1px solid ${isPaused ? 'rgba(245, 158, 11, 0.35)' : 'rgba(244, 63, 94, 0.35)'}`,
         padding: '10px 24px',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        boxShadow: isPaused
-          ? '0 4px 20px rgba(245, 158, 11, 0.1)'
-          : '0 4px 20px rgba(239, 68, 68, 0.15)',
+        flexDirection: 'column',
+        gap: 8,
+        position: 'sticky',
+        top: 52,
+        zIndex: 30,
+        backdropFilter: 'blur(12px)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Circle
-            size={12}
-            style={{
-              color: isPaused ? '#f59e0b' : '#ef4444',
-              fill: isPaused ? '#f59e0b' : '#ef4444',
-              animation: isPaused ? 'none' : 'pulse 1.5s infinite',
-            }}
-          />
-          <span
-            style={{
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              letterSpacing: '0.05em',
-              color: isPaused ? '#f59e0b' : '#ef4444',
-            }}
-          >
-            {isPaused ? 'PAUSED' : 'RECORDING'}
-          </span>
-        </div>
+      {/* Top Recording Instrument Bar */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 10,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          {/* Status Indicator */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Circle
+              size={10}
+              style={{
+                color: isPaused ? 'var(--semantic-amber)' : 'var(--semantic-recording)',
+                fill: isPaused ? 'var(--semantic-amber)' : 'var(--semantic-recording)',
+                animation: isPaused ? 'none' : 'pulse-dot 1.2s infinite',
+              }}
+            />
+            <span
+              style={{
+                fontWeight: 700,
+                fontSize: '0.82rem',
+                letterSpacing: '0.06em',
+                color: isPaused ? 'var(--semantic-amber)' : 'var(--semantic-recording)',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              {isPaused ? 'PAUSED' : '● LIVE RECORDING'}
+            </span>
+          </div>
 
-        <div style={{ height: '16px', width: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+          <div style={{ width: 1, height: 16, background: 'var(--border-subtle)' }} />
 
-        <div>
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
+          {/* Time & Counter */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span
+              className="mono"
+              style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-primary)' }}
+            >
+              {formatTime(elapsed)}
+            </span>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-xs)',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border-default)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+              }}
+            >
+              <Terminal size={11} style={{ color: 'var(--semantic-auth)' }} />
+              {recording.actionCount} ACTION{recording.actionCount === 1 ? '' : 'S'}
+            </span>
+          </div>
+
+          <div style={{ width: 1, height: 16, background: 'var(--border-subtle)' }} />
+
+          {/* Task Description */}
+          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
             {recording.taskDescription}
           </span>
-          <span
-            className="mono"
-            style={{ fontSize: '0.78rem', color: '#94a3b8', marginLeft: '10px' }}
-          >
-            ⏱ {formatTime(elapsed)} | {recording.actionCount} action(s)
-          </span>
         </div>
 
-        {recording.lastAction && (
-          <div
-            className="mono"
+        {/* Action Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {isPaused ? (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={onResume}
+              style={{ gap: 5 }}
+            >
+              <Play size={12} /> Resume
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={onPause}
+              style={{ gap: 5 }}
+            >
+              <Pause size={12} /> Pause
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="btn btn-accent btn-sm"
+            onClick={onComplete}
             style={{
-              fontSize: '0.75rem',
-              background: 'rgba(0, 0, 0, 0.3)',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              color: '#38bdf8',
+              gap: 5,
+              background: 'var(--semantic-emerald)',
+              borderColor: 'var(--semantic-emerald)',
             }}
           >
-            Latest: {recording.lastAction.actionType} ({recording.lastAction.summary})
-          </div>
-        )}
+            <CheckCircle size={12} /> Complete & Save
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-danger btn-sm"
+            onClick={onDiscard}
+            style={{ gap: 5 }}
+          >
+            <Trash2 size={12} /> Discard
+          </button>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px' }}>
-        {isPaused ? (
-          <button
-            className="btn btn-secondary"
-            style={{ padding: '5px 10px', fontSize: '0.78rem', gap: '4px' }}
-            onClick={onResume}
-          >
-            <Play size={12} /> Resume
-          </button>
-        ) : (
-          <button
-            className="btn btn-secondary"
-            style={{ padding: '5px 10px', fontSize: '0.78rem', gap: '4px' }}
-            onClick={onPause}
-          >
-            <Pause size={12} /> Pause
-          </button>
-        )}
-
-        <button
-          className="btn btn-primary"
+      {/* Live Semantic Trace Breadcrumb Feed */}
+      {recording.actionTrace && recording.actionTrace.length > 0 && (
+        <div
           style={{
-            padding: '5px 12px',
-            fontSize: '0.78rem',
-            gap: '4px',
-            background: 'var(--success)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            overflowX: 'auto',
+            paddingTop: 4,
+            borderTop: '1px solid var(--border-subtle)',
           }}
-          onClick={onComplete}
         >
-          <CheckCircle size={12} /> Finish Demonstration
-        </button>
-
-        <button
-          className="btn btn-secondary"
-          style={{ padding: '5px 10px', fontSize: '0.78rem', gap: '4px', color: '#ef4444' }}
-          onClick={onDiscard}
-        >
-          <Trash2 size={12} /> Discard
-        </button>
-      </div>
+          <span
+            style={{
+              fontSize: '0.7rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: 'var(--text-muted)',
+              fontWeight: 700,
+            }}
+          >
+            Trace:
+          </span>
+          {recording.actionTrace.map((act, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border-default)',
+                borderRadius: 'var(--radius-xs)',
+                padding: '2px 8px',
+                fontSize: '0.74rem',
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--text-primary)',
+                whiteSpace: 'nowrap',
+                animation: 'drawer-fade-in 200ms ease-out',
+              }}
+            >
+              <span style={{ color: 'var(--text-muted)' }}>0{index + 1}</span>
+              <span style={{ color: 'var(--semantic-auth)', fontWeight: 600 }}>
+                {act.actionType}
+              </span>
+              {act.summary && (
+                <span style={{ color: 'var(--text-secondary)' }}>({act.summary})</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

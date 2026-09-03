@@ -41,6 +41,14 @@ export function createAuthorizationRoutes(services: AppServices) {
     return c.json({ data: created }, 201);
   });
 
+  // GET /api/authorizations
+  router.get('/', async c => {
+    const status = c.req.query('status') as any;
+    const toolId = c.req.query('toolId');
+    const auths = await services.authorizationRepo.list({ status, toolId });
+    return c.json({ data: auths });
+  });
+
   // GET /api/authorizations/:id
   router.get('/:id', async c => {
     const id = c.req.param('id');
