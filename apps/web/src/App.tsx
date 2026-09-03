@@ -84,12 +84,9 @@ export const App: React.FC = () => {
   const handlePauseRecording = async () => {
     if (!recording) return;
     try {
-      await fetch(
-        `/api/demonstrations/${recording.demonstrationId}/recording/pause`,
-        {
-          method: 'POST',
-        },
-      );
+      await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/pause`, {
+        method: 'POST',
+      });
       setRecording(prev => (prev ? { ...prev, status: 'PAUSED' } : null));
     } catch (err) {
       console.error('Failed to pause recording', err);
@@ -99,12 +96,9 @@ export const App: React.FC = () => {
   const handleResumeRecording = async () => {
     if (!recording) return;
     try {
-      await fetch(
-        `/api/demonstrations/${recording.demonstrationId}/recording/resume`,
-        {
-          method: 'POST',
-        },
-      );
+      await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/resume`, {
+        method: 'POST',
+      });
       setRecording(prev => (prev ? { ...prev, status: 'RECORDING' } : null));
     } catch (err) {
       console.error('Failed to resume recording', err);
@@ -114,12 +108,9 @@ export const App: React.FC = () => {
   const handleCompleteRecording = async () => {
     if (!recording) return;
     try {
-      await fetch(
-        `/api/demonstrations/${recording.demonstrationId}/recording/complete`,
-        {
-          method: 'POST',
-        },
-      );
+      await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/complete`, {
+        method: 'POST',
+      });
       setRecording(null);
       await fetchData();
       setActiveTab('synthesis');
@@ -131,12 +122,9 @@ export const App: React.FC = () => {
   const handleDiscardRecording = async () => {
     if (!recording) return;
     try {
-      await fetch(
-        `/api/demonstrations/${recording.demonstrationId}/recording/discard`,
-        {
-          method: 'POST',
-        },
-      );
+      await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/discard`, {
+        method: 'POST',
+      });
       setRecording(null);
       await fetchData();
     } catch (err) {

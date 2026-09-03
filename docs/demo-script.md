@@ -19,6 +19,7 @@ page's own **Approve** button, and clicks it itself. A receipt prints:
 `approved_by: human ✓`.
 
 **Voiceover:**
+
 > "This is an open bug in the WebMCP spec's own tracker — issue #288. An agent
 > called a tool, saw the page's Approve button, and clicked it. The receipt says
 > a human approved. No human decided anything. This is the problem DEPUTY solves."
@@ -32,13 +33,18 @@ page's own **Approve** button, and clicks it itself. A receipt prints:
 **Screen:** The identical agent flow, now against DEPUTY. The agent proposes the
 irreversible tool. Instead of a button it can click, it receives a **typed
 structured refusal** — raw JSON on screen:
+
 ```json
-{ "refusal": true, "code": "AUTHORIZATION_REQUIRED",
+{
+  "refusal": true,
+  "code": "AUTHORIZATION_REQUIRED",
   "reason": "Irreversible action requires human user-verification.",
-  "requiredActions": ["Produce a WebAuthn UV assertion bound to the argument digest"] }
+  "requiredActions": ["Produce a WebAuthn UV assertion bound to the argument digest"]
+}
 ```
 
 **Voiceover:**
+
 > "Same attack, against DEPUTY. There is no Approve button in the DOM for the
 > agent to press. The tool returns a typed refusal. Approval isn't a UI element —
 > it's a cryptographic assertion the agent cannot manufacture."
@@ -56,6 +62,7 @@ reversibility/provenance metadata. The new tool appears live in the **Agent's-Ey
 View** panel the instant it's synthesised.
 
 **Voiceover:**
+
 > "Here's where the capability comes from. A human does the task once. DEPUTY
 > compares demonstrations, infers the parameters, and generates a typed WebMCP
 > tool — schema, reversibility, provenance. The human authored a capability by
@@ -68,6 +75,7 @@ View** panel the instant it's synthesised.
 ## Beat 4 — Agent calls it; refusal → passkey → commit; then void it (1:20–2:00) · 40s
 
 **Screen:**
+
 1. Agent proposes the irreversible refund tool → structured refusal
    (`AUTHORIZATION_REQUIRED`).
 2. Human taps the passkey. WebAuthn UV succeeds. A **single-use commit tool** is
@@ -77,6 +85,7 @@ View** panel the instant it's synthesised.
    digests side by side.
 
 **Voiceover:**
+
 > "The agent calls the tool. Refused. A human taps their passkey — and the
 > challenge it signs is the SHA-256 digest of the exact tool, version, and
 > arguments. Authorization succeeds; a single-use commit tool runs the action
@@ -95,6 +104,7 @@ execution — is one link in a SHA-256 hash chain. Highlight the `prevHash → h
 linkage and the recorded **argument digest** on the execution row.
 
 **Voiceover:**
+
 > "And all of it lands in a hash-chained, tamper-evident audit log. Delete or
 > edit any row and verification fails. The receipt records what was actually
 > authorized — the exact arguments — not 'approved by you.'"

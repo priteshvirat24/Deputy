@@ -53,7 +53,9 @@ export function recordProposal(proposal: unknown): void {
 function isRefusalLike(value: unknown): boolean {
   if (!value || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
-  return v.refusal === true || v.decision === 'REQUIRE_HUMAN_AUTHORIZATION' || v.decision === 'DENY';
+  return (
+    v.refusal === true || v.decision === 'REQUIRE_HUMAN_AUTHORIZATION' || v.decision === 'DENY'
+  );
 }
 
 export function recordResponse(response: unknown): void {

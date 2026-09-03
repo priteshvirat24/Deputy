@@ -102,8 +102,7 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ tools, onRefresh }) => {
           <div>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Active Capabilities Surface</h3>
             <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
-              Tools currently registered in the browser Model Context API
-              (`document.modelContext`).
+              Tools currently registered in the browser Model Context API (`document.modelContext`).
             </div>
           </div>
           <button className="btn btn-secondary" onClick={onRefresh}>

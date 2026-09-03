@@ -11,10 +11,7 @@
  */
 
 export type ModelContextLocation =
-  | 'document.modelContext'
-  | 'navigator.modelContext'
-  | 'window.webMCP'
-  | 'none';
+  'document.modelContext' | 'navigator.modelContext' | 'window.webMCP' | 'none';
 
 export interface ModelContextHost {
   registerTool?: (tool: unknown, options?: { signal?: AbortSignal }) => unknown;

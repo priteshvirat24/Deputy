@@ -35,20 +35,17 @@ export const PasskeyAuthModal: React.FC<PasskeyAuthModalProps> = ({
 
     try {
       // 1. Request cryptographically bound WebAuthn challenge from server
-      const challengeRes = await fetch(
-        '/api/auth/webauthn/authorize/challenge',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            toolId,
-            toolVersion,
-            arguments: args,
-            requestId,
-            actorId: 'usr_ops_lead',
-          }),
-        },
-      );
+      const challengeRes = await fetch('/api/auth/webauthn/authorize/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toolId,
+          toolVersion,
+          arguments: args,
+          requestId,
+          actorId: 'usr_ops_lead',
+        }),
+      });
 
       const challengeData = await challengeRes.json();
       if (!challengeRes.ok) {

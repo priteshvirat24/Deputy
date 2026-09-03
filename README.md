@@ -8,7 +8,7 @@
 every irreversible call is refused until a human produces a passkey assertion
 bound to the SHA-256 digest of the exact tool, version, and arguments.**
 
-- 🌐 **Live demo:** https://deputy-webmcp.onrender.com *(register a passkey, then propose the refund tool)*
+- 🌐 **Live demo:** https://deputy-webmcp.onrender.com _(register a passkey, then propose the refund tool)_
 - 🎬 **Demo video:** _<!-- add final video URL -->_ · script in [`docs/demo-script.md`](docs/demo-script.md)
 - 🧩 **What it advances in the standard:** [`docs/spec-contributions.md`](docs/spec-contributions.md)
 

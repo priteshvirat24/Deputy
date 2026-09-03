@@ -30,9 +30,7 @@ export const SecurityView: React.FC = () => {
   const fetchPasskeys = async () => {
     setLoadingPasskeys(true);
     try {
-      const res = await fetch(
-        '/api/auth/webauthn/credentials?actorId=usr_ops_lead',
-      );
+      const res = await fetch('/api/auth/webauthn/credentials?actorId=usr_ops_lead');
       const json = await res.json();
       if (json.data) {
         setPasskeys(json.data);
@@ -98,12 +96,9 @@ export const SecurityView: React.FC = () => {
 
   const revokePasskey = async (credentialId: string) => {
     try {
-      const res = await fetch(
-        `/api/auth/webauthn/credentials/${credentialId}/revoke`,
-        {
-          method: 'POST',
-        },
-      );
+      const res = await fetch(`/api/auth/webauthn/credentials/${credentialId}/revoke`, {
+        method: 'POST',
+      });
       if (res.ok) {
         await fetchPasskeys();
       }

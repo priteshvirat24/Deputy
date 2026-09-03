@@ -65,14 +65,22 @@ export const AgentEyeView: React.FC<AgentEyeViewProps> = ({ tools }) => {
 
       {/* Resolved host */}
       <div className="card" style={{ marginBottom: '20px' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: 600, display: 'flex', gap: 8, marginBottom: 12 }}>
+        <h3
+          style={{ fontSize: '1rem', fontWeight: 600, display: 'flex', gap: 8, marginBottom: 12 }}
+        >
           <Cpu size={18} /> Resolved WebMCP Host
         </h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
           <HostBadge
             label="Location"
             value={resolved.location}
-            tone={resolved.location === 'document.modelContext' ? 'ok' : resolved.host ? 'warn' : 'muted'}
+            tone={
+              resolved.location === 'document.modelContext'
+                ? 'ok'
+                : resolved.host
+                  ? 'warn'
+                  : 'muted'
+            }
           />
           <HostBadge
             label="Provider"
@@ -106,9 +114,9 @@ export const AgentEyeView: React.FC<AgentEyeViewProps> = ({ tools }) => {
           <div style={{ marginTop: 10, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
             {resolved.reason}
             <div style={{ marginTop: 4 }}>
-              This browser exposes no WebMCP host, so tools are held in the fallback adapter. Open in
-              a Chrome with <code>chrome://flags/#enable-webmcp-testing</code> to see them land in{' '}
-              <code>document.modelContext</code>.
+              This browser exposes no WebMCP host, so tools are held in the fallback adapter. Open
+              in a Chrome with <code>chrome://flags/#enable-webmcp-testing</code> to see them land
+              in <code>document.modelContext</code>.
             </div>
           </div>
         )}
@@ -135,27 +143,43 @@ export const AgentEyeView: React.FC<AgentEyeViewProps> = ({ tools }) => {
                 {def.annotations?.destructiveHint && (
                   <span
                     className="badge"
-                    style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', fontSize: '0.68rem' }}
+                    style={{
+                      background: 'rgba(239,68,68,0.12)',
+                      color: '#f87171',
+                      fontSize: '0.68rem',
+                    }}
                   >
                     destructiveHint: true
                   </span>
                 )}
                 <span
                   className="badge"
-                  style={{ background: 'rgba(148,163,184,0.12)', color: '#94a3b8', fontSize: '0.68rem' }}
+                  style={{
+                    background: 'rgba(148,163,184,0.12)',
+                    color: '#94a3b8',
+                    fontSize: '0.68rem',
+                  }}
                 >
                   readOnlyHint: false
                 </span>
                 <span
                   className="badge"
-                  style={{ background: 'rgba(148,163,184,0.12)', color: '#94a3b8', fontSize: '0.68rem' }}
+                  style={{
+                    background: 'rgba(148,163,184,0.12)',
+                    color: '#94a3b8',
+                    fontSize: '0.68rem',
+                  }}
                 >
                   idempotentHint: (declined)
                 </span>
                 {def.annotations?.requiresHumanAuthorization && (
                   <span
                     className="badge"
-                    style={{ background: 'rgba(56,189,248,0.12)', color: '#38bdf8', fontSize: '0.68rem' }}
+                    style={{
+                      background: 'rgba(56,189,248,0.12)',
+                      color: '#38bdf8',
+                      fontSize: '0.68rem',
+                    }}
                   >
                     <ShieldAlert size={11} /> requires passkey
                   </span>

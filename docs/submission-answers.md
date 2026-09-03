@@ -7,7 +7,7 @@
 
 ## 1. Why is WebMCP a strong fit for this project?
 
-DEPUTY's whole thesis is that a web page should expose *capabilities*, not a DOM
+DEPUTY's whole thesis is that a web page should expose _capabilities_, not a DOM
 for an agent to poke at — which is exactly what WebMCP is for. The problem we
 attack only exists because the alternative (agents driving the UI) lets an agent
 click the page's own Approve button and forge a human decision. That is a live
@@ -34,7 +34,7 @@ create a customer, bill an invoice — and DEPUTY compiles the repeated semantic
 workflow into a typed tool. Authoring a capability is now a side effect of doing
 the job. And they get a hardware-backed guarantee: no agent can execute an
 irreversible action in their name without their physical passkey, bound to the
-*exact* arguments.
+_exact_ arguments.
 
 For the **agent**: it discovers real tools with schemas and annotations, gets
 deterministic typed refusals instead of ambiguous errors, and never has to scrape
@@ -43,7 +43,7 @@ a UI or guess whether a button is safe to click.
 For **both**, the Agent's-Eye View makes the shared surface legible: you see the
 tools an agent sees, their schemas, and the last refusal as a typed object.
 
-## 3. What becomes possible for humans + agents *together* that wasn't before?
+## 3. What becomes possible for humans + agents _together_ that wasn't before?
 
 This is the differentiator, and it is not "the agent does it for you."
 
@@ -56,7 +56,7 @@ attested to. Three things become possible that weren't:
    approval is bound to the SHA-256 digest of the exact tool, version, and
    arguments. Change one argument and the attestation is void
    (`ARGUMENT_DIGEST_MISMATCH`). You can hand an agent a refund capability and
-   know it cannot become a *different* refund. Approval is no longer a checkbox an
+   know it cannot become a _different_ refund. Approval is no longer a checkbox an
    agent can move; it is a signature over a specific act.
 
 2. **Capability that a non-programmer produces by working.** The human never

@@ -1,18 +1,18 @@
 # DEPUTY ↔ WebMCP: Contributions to Open Spec Issues
 
-DEPUTY is not just *a project using WebMCP* — it is a working implementation of
+DEPUTY is not just _a project using WebMCP_ — it is a working implementation of
 fixes for open problems in the WebMCP standard's own issue tracker. This document
 maps each issue to the code that addresses it, and is explicit about which are
 full implementations and which are partial or proposals.
 
 Spec repository: `webmachinelearning/webmcp` (issue numbers below).
 
-| Issue | Topic | DEPUTY status |
-| ----- | ----- | ------------- |
-| #288 | Agent forges its own approval | **Full implementation** |
-| #282 | Structured refusals for tool calls | **Full implementation** |
-| #267 | Turn awareness / double-called non-idempotent tools | **Partial — conservative stance + hint** |
-| #105 | Agent identity | **Proposal / partial** |
+| Issue | Topic                                               | DEPUTY status                            |
+| ----- | --------------------------------------------------- | ---------------------------------------- |
+| #288  | Agent forges its own approval                       | **Full implementation**                  |
+| #282  | Structured refusals for tool calls                  | **Full implementation**                  |
+| #267  | Turn awareness / double-called non-idempotent tools | **Partial — conservative stance + hint** |
+| #105  | Agent identity                                      | **Proposal / partial**                   |
 
 ---
 
@@ -30,6 +30,7 @@ arguments — something an agent cannot manufacture. Only after a valid assertio
 is a **single-use** commit tool temporarily registered.
 
 **Code:**
+
 - `packages/security/src/webauthn/challenge.ts` — `computeBoundChallenge()` binds
   the challenge to `toolId : version : argumentDigest : requestId : nonce`.
 - `packages/security/src/authorization-verifier.ts` — verifies the assertion and
@@ -50,6 +51,7 @@ why / what to do," rather than free-text errors an agent has to parse.
 `requiredActions`, and a `retryable` flag — never prose an agent must scrape.
 
 **Code:**
+
 - `packages/webmcp/src/types.ts` — `StructuredRefusal` and the
   `StructuredRefusalCode` union (e.g. `AUTHORIZATION_REQUIRED`,
   `ARGUMENT_DIGEST_MISMATCH`, `TOOL_RETIRED`, `RESPONSE_QUARANTINED`).
@@ -74,6 +76,7 @@ tool's second call finds its authorization already consumed) and by
 `Idempotency-Key` caching on mutations (Invariant 34).
 
 **Code:**
+
 - `packages/webmcp/src/tool-descriptor.ts` — `deriveBehaviourHints()` omits
   `idempotentHint` by design; comment cites #267.
 - `packages/webmcp/src/types.ts` — `McpBehaviourHints.idempotentHint?: undefined`.
@@ -86,7 +89,7 @@ in the host, not the page. This is a stance plus mitigations, not a full fix.
 
 ## #105 — Agent identity (open, backlogged)
 
-**The problem.** Tools often need to know *which* agent is calling, for policy and
+**The problem.** Tools often need to know _which_ agent is calling, for policy and
 audit — but there is no standardized agent-identity mechanism yet.
 
 **DEPUTY's contribution — proposal / partial.** Proposals carry a `proposedBy`
@@ -96,6 +99,7 @@ that a standard mechanism could later replace; it is **not** a cryptographic
 attestation of agent identity, and we don't claim it is.
 
 **Code:**
+
 - Proposal shape includes `proposedBy: { agentId, origin }`
   (`apps/web/src/pages/ToolsView.tsx`, server proposal routes).
 - `packages/security/src/policy-engine.ts` — reads identity into the decision.
