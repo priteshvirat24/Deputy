@@ -147,7 +147,7 @@ export const InteractiveCoreSection: React.FC<InteractiveCoreSectionProps> = ({
                   boxShadow: '0 0 6px #059669',
                 }}
               />
-              <span>THREE.JS WEBGL · MOVE MOUSE TO ROTATE</span>
+              <span>CAPABILITY GRAPH · 16 ACTIVE NODES</span>
             </div>
 
             {/* Three.js Canvas */}
