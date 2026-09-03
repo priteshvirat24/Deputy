@@ -4,6 +4,7 @@ export type BadgeVariant =
   | 'active'
   | 'draft'
   | 'retired'
+  | 'disabled'
   | 'reversible'
   | 'compensatable'
   | 'irreversible'
@@ -12,6 +13,7 @@ export type BadgeVariant =
   | 'risk-high'
   | 'risk-critical'
   | 'auth'
+  | 'webmcp'
   | 'neutral';
 
 export interface BadgeProps {
@@ -19,11 +21,12 @@ export interface BadgeProps {
   children: React.ReactNode;
   icon?: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export const Badge: React.FC<BadgeProps> = ({ variant, children, icon, className = '' }) => {
+export const Badge: React.FC<BadgeProps> = ({ variant, children, icon, className = '', style }) => {
   return (
-    <span className={`badge badge-${variant} ${className}`}>
+    <span className={`badge badge-${variant} ${className}`} style={style}>
       {icon && <span style={{ display: 'inline-flex', alignItems: 'center' }}>{icon}</span>}
       {children}
     </span>

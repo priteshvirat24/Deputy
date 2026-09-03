@@ -2,10 +2,13 @@ import React from 'react';
 import {
   LayoutDashboard,
   Terminal,
-  ScrollText,
   Video,
   Sparkles,
   Wrench,
+  Cpu,
+  Key,
+  ShieldAlert,
+  ScrollText,
   ShieldCheck,
   Settings,
   Shield,
@@ -14,177 +17,196 @@ import {
 export type ActiveTab =
   | 'dashboard'
   | 'operations'
-  | 'audit'
   | 'demonstrations'
   | 'synthesis'
   | 'tools'
+  | 'webmcp'
+  | 'authorizations'
+  | 'quarantine'
+  | 'audit'
   | 'security'
   | 'settings';
 
 interface SidebarProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
-  isRecording?: boolean;
+  pendingAuthCount?: number;
+  activeToolCount?: number;
 }
 
-interface NavItemConfig {
-  id: ActiveTab;
-  label: string;
-  icon: React.ReactNode;
-  indicator?: boolean;
-}
-
-interface NavGroupConfig {
-  title: string;
-  items: NavItemConfig[];
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isRecording }) => {
-  const navGroups: NavGroupConfig[] = [
-    {
-      title: 'COMMAND',
-      items: [
-        {
-          id: 'dashboard',
-          label: 'Command Center',
-          icon: <LayoutDashboard size={16} className="nav-icon" />,
-        },
-        {
-          id: 'operations',
-          label: 'Operations Console',
-          icon: <Terminal size={16} className="nav-icon" />,
-          indicator: isRecording,
-        },
-        {
-          id: 'audit',
-          label: 'Audit Trail',
-          icon: <ScrollText size={16} className="nav-icon" />,
-        },
-      ],
-    },
-    {
-      title: 'LEARN',
-      items: [
-        {
-          id: 'demonstrations',
-          label: 'Demonstrations',
-          icon: <Video size={16} className="nav-icon" />,
-        },
-        {
-          id: 'synthesis',
-          label: 'Synthesis Studio',
-          icon: <Sparkles size={16} className="nav-icon" />,
-        },
-      ],
-    },
-    {
-      title: 'CAPABILITIES',
-      items: [
-        {
-          id: 'tools',
-          label: 'WebMCP Tools',
-          icon: <Wrench size={16} className="nav-icon" />,
-        },
-      ],
-    },
-    {
-      title: 'SECURITY',
-      items: [
-        {
-          id: 'security',
-          label: 'Security Posture',
-          icon: <ShieldCheck size={16} className="nav-icon" />,
-        },
-      ],
-    },
-    {
-      title: 'SYSTEM',
-      items: [
-        {
-          id: 'settings',
-          label: 'Settings',
-          icon: <Settings size={16} className="nav-icon" />,
-        },
-      ],
-    },
-  ];
-
+export const Sidebar: React.FC<SidebarProps> = ({
+  activeTab,
+  onSelectTab,
+  pendingAuthCount = 0,
+  activeToolCount = 0,
+}) => {
   return (
-    <aside className="sidebar" aria-label="System Navigation">
+    <aside className="sidebar">
+      {/* Brand Header */}
       <div className="sidebar-header">
         <div className="brand">
           <div className="brand-icon">
-            <Shield size={17} />
+            <Shield size={18} />
           </div>
           <div>
-            <h1 className="brand-name">DEPUTY</h1>
-            <div className="brand-tagline">WebMCP Security Authority</div>
+            <div className="brand-name">DEPUTY</div>
+            <div className="brand-tagline">Security Architecture</div>
           </div>
         </div>
       </div>
 
-      <nav className="nav-groups">
-        {navGroups.map(group => (
-          <div key={group.title} className="nav-group">
-            <div className="nav-group-label">{group.title}</div>
-            <ul className="nav-items">
-              {group.items.map(item => {
-                const isActive = activeTab === item.id;
-                return (
-                  <li
-                    key={item.id}
-                    role="button"
-                    tabIndex={0}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => onSelectTab(item.id)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        onSelectTab(item.id);
-                      }
-                    }}
-                  >
-                    {item.icon}
-                    <span style={{ flex: 1 }}>{item.label}</span>
-                    {item.indicator && (
-                      <span
-                        title="Recording active"
-                        style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: '50%',
-                          background: 'var(--semantic-recording)',
-                          boxShadow: '0 0 6px var(--semantic-recording)',
-                        }}
-                      />
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </nav>
+      {/* Nav Groups */}
+      <ul className="nav-groups">
+        {/* Monitoring & Operations */}
+        <li>
+          <div className="nav-group-label">OPERATIONS</div>
+          <ul className="nav-items">
+            <li
+              className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+              onClick={() => onSelectTab('dashboard')}
+            >
+              <LayoutDashboard size={15} className="nav-icon" />
+              <span>Command Center</span>
+            </li>
+            <li
+              className={`nav-item ${activeTab === 'operations' ? 'active' : ''}`}
+              onClick={() => onSelectTab('operations')}
+            >
+              <Terminal size={15} className="nav-icon" />
+              <span>Operations Console</span>
+            </li>
+          </ul>
+        </li>
 
+        {/* Learning Pipeline */}
+        <li>
+          <div className="nav-group-label">LEARNING PIPELINE</div>
+          <ul className="nav-items">
+            <li
+              className={`nav-item ${activeTab === 'demonstrations' ? 'active' : ''}`}
+              onClick={() => onSelectTab('demonstrations')}
+            >
+              <Video size={15} className="nav-icon" />
+              <span>Demonstrations</span>
+            </li>
+            <li
+              className={`nav-item ${activeTab === 'synthesis' ? 'active' : ''}`}
+              onClick={() => onSelectTab('synthesis')}
+            >
+              <Sparkles size={15} className="nav-icon" />
+              <span>Synthesis Studio</span>
+            </li>
+          </ul>
+        </li>
+
+        {/* Capabilities & Runtime */}
+        <li>
+          <div className="nav-group-label">CAPABILITIES</div>
+          <ul className="nav-items">
+            <li
+              className={`nav-item ${activeTab === 'tools' ? 'active' : ''}`}
+              onClick={() => onSelectTab('tools')}
+            >
+              <Wrench size={15} className="nav-icon" />
+              <span style={{ flex: 1 }}>Tools Registry</span>
+              {activeToolCount > 0 && (
+                <span
+                  className="mono"
+                  style={{
+                    fontSize: '0.68rem',
+                    background: 'var(--surface-3)',
+                    padding: '1px 5px',
+                    borderRadius: 'var(--radius-xs)',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  {activeToolCount}
+                </span>
+              )}
+            </li>
+            <li
+              className={`nav-item ${activeTab === 'webmcp' ? 'active' : ''}`}
+              onClick={() => onSelectTab('webmcp')}
+            >
+              <Cpu size={15} className="nav-icon" />
+              <span>WebMCP Runtime</span>
+            </li>
+          </ul>
+        </li>
+
+        {/* Governance & Security Enclave */}
+        <li>
+          <div className="nav-group-label">SECURITY & AUDIT</div>
+          <ul className="nav-items">
+            <li
+              className={`nav-item ${activeTab === 'authorizations' ? 'active' : ''}`}
+              onClick={() => onSelectTab('authorizations')}
+            >
+              <Key size={15} className="nav-icon" />
+              <span style={{ flex: 1 }}>Authorizations</span>
+              {pendingAuthCount > 0 && (
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    background: 'rgba(245, 158, 11, 0.2)',
+                    color: 'var(--semantic-amber)',
+                    padding: '1px 6px',
+                    borderRadius: 'var(--radius-xs)',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                  }}
+                >
+                  {pendingAuthCount}
+                </span>
+              )}
+            </li>
+            <li
+              className={`nav-item ${activeTab === 'quarantine' ? 'active' : ''}`}
+              onClick={() => onSelectTab('quarantine')}
+            >
+              <ShieldAlert size={15} className="nav-icon" />
+              <span>Quarantine</span>
+            </li>
+            <li
+              className={`nav-item ${activeTab === 'audit' ? 'active' : ''}`}
+              onClick={() => onSelectTab('audit')}
+            >
+              <ScrollText size={15} className="nav-icon" />
+              <span>Audit Trail</span>
+            </li>
+            <li
+              className={`nav-item ${activeTab === 'security' ? 'active' : ''}`}
+              onClick={() => onSelectTab('security')}
+            >
+              <ShieldCheck size={15} className="nav-icon" />
+              <span>Security Posture</span>
+            </li>
+          </ul>
+        </li>
+
+        {/* System Settings */}
+        <li>
+          <div className="nav-group-label">SYSTEM</div>
+          <ul className="nav-items">
+            <li
+              className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
+              onClick={() => onSelectTab('settings')}
+            >
+              <Settings size={15} className="nav-icon" />
+              <span>Settings</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      {/* Footer */}
       <div className="sidebar-footer">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem' }}>DEPUTY v0.4.0</span>
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              color: 'var(--semantic-emerald)',
-              fontSize: '0.7rem',
-            }}
-          >
-            <span className="status-dot active" />
-            READY
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+          <span className="status-dot active" />
+          <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>DEPUTY v1.0.0</span>
         </div>
-        <div style={{ marginTop: '4px', color: 'var(--text-muted)', fontSize: '0.68rem' }}>
-          Deterministic WebMCP Gate
+        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+          Fail-Closed Runtime Active
         </div>
       </div>
     </aside>

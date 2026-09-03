@@ -1,139 +1,87 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, Cpu, Database, User } from 'lucide-react';
-import { detectWebMCPSupport } from '@deputy/webmcp';
+import { Search } from 'lucide-react';
+import { ActiveRecordingState } from './RecordingBar.js';
 
-export const TopBar: React.FC = () => {
-  const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null);
-  const [webmcpAvailable, setWebmcpAvailable] = useState<boolean>(false);
+interface TopBarProps {
+  onOpenCommandPalette: () => void;
+  recording: ActiveRecordingState | null;
+}
+
+export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording }) => {
+  const [serverOnline, setServerOnline] = useState(true);
 
   useEffect(() => {
-    // 1. Check native WebMCP availability
-    const caps = detectWebMCPSupport();
-    setWebmcpAvailable(caps.available);
-
-    // 2. Query real health endpoint
     const checkHealth = async () => {
       try {
         const res = await fetch('http://localhost:4000/api/health');
-        if (res.ok) {
-          const json = await res.json();
-          setBackendHealthy(json.status === 'healthy' || json.status === 'ok');
-        } else {
-          setBackendHealthy(false);
-        }
+        setServerOnline(res.ok);
       } catch {
-        setBackendHealthy(false);
+        setServerOnline(false);
       }
     };
 
     checkHealth();
-    const interval = setInterval(checkHealth, 30000);
+    const interval = setInterval(checkHealth, 8000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <header className="top-command-bar" role="banner">
+    <header className="top-command-bar">
+      {/* Left: Global Command Palette Trigger */}
       <div className="top-bar-left">
-        {/* Workspace Scope */}
-        <div
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={onOpenCommandPalette}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontSize: '0.82rem',
-            fontWeight: 600,
+            background: 'var(--surface-2)',
+            borderColor: 'var(--border-subtle)',
+            gap: 10,
+            padding: '5px 12px',
+            borderRadius: 'var(--radius-sm)',
+            minWidth: 240,
+            justifyContent: 'space-between',
           }}
         >
-          <span style={{ color: 'var(--text-muted)' }}>Workspace:</span>
-          <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
-            deputy.primary
-          </span>
-        </div>
-
-        <div style={{ width: 1, height: 16, background: 'var(--border-subtle)' }} />
-
-        {/* Backend Connectivity Probe */}
-        <div className="system-status-indicator" title="Live status from GET /api/health">
-          <span
-            className={`status-dot ${backendHealthy === true ? 'active' : backendHealthy === false ? 'danger' : 'amber'}`}
-          />
-          <span style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)' }}>
-            API{' '}
-            {backendHealthy === true
-              ? 'OPERATIONAL'
-              : backendHealthy === false
-                ? 'OFFLINE'
-                : 'PROBING...'}
-          </span>
-        </div>
-
-        {/* WebMCP Runtime State */}
-        <div
-          className="system-status-indicator"
-          title={
-            webmcpAvailable ? 'Native modelContext detected' : 'Emulated WebMCP adapter active'
-          }
-        >
-          <Cpu size={13} style={{ color: 'var(--semantic-webmcp)' }} />
-          <span style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)' }}>
-            WebMCP {webmcpAvailable ? 'NATIVE' : 'EMULATED'}
-          </span>
-        </div>
-
-        {/* Security Gate Mode */}
-        <div
-          className="system-status-indicator"
-          title="Fail-Closed ActionRegistry Gate & FIDO2 WebAuthn UV"
-        >
-          <ShieldCheck size={13} style={{ color: 'var(--semantic-auth)' }} />
-          <span style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)' }}>
-            GATE: WEBAUTHN UV
-          </span>
-        </div>
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)' }}
+          >
+            <Search size={13} />
+            <span style={{ fontSize: '0.8rem' }}>Type a command or search...</span>
+          </div>
+          <span className="command-palette-kbd">⌘K</span>
+        </button>
       </div>
 
+      {/* Right: Runtime Diagnostics */}
       <div className="top-bar-right">
-        {/* Audit Hash-Chain Status */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '0.75rem',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          <Database size={13} style={{ color: 'var(--semantic-audit)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)' }}>SHA-256 CHAIN: ACTIVE</span>
-        </div>
-
-        <div style={{ width: 1, height: 16, background: 'var(--border-subtle)' }} />
-
-        {/* Operator Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem' }}>
+        {/* Active Recording Notice if any */}
+        {recording && (
           <div
             style={{
-              width: 24,
-              height: 24,
-              borderRadius: 'var(--radius-xs)',
-              background: 'var(--surface-3)',
-              border: '1px solid var(--border-subtle)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--text-secondary)',
-            }}
-          >
-            <User size={13} />
-          </div>
-          <span
-            style={{
+              gap: 6,
+              padding: '3px 8px',
+              borderRadius: 'var(--radius-xs)',
+              background: 'rgba(244, 63, 94, 0.12)',
+              border: '1px solid rgba(244, 63, 94, 0.3)',
               fontFamily: 'var(--font-mono)',
-              color: 'var(--text-secondary)',
-              fontSize: '0.75rem',
+              fontSize: '0.72rem',
+              color: 'var(--semantic-recording)',
+              fontWeight: 700,
             }}
           >
-            admin_usr_01
+            <span className="status-dot recording" />
+            <span>RECORDING: {recording.actionCount} ACTIONS</span>
+          </div>
+        )}
+
+        {/* Server & Security Status Indicator */}
+        <div className="system-status-indicator">
+          <span className={`status-dot ${serverOnline ? 'active' : 'danger'}`} />
+          <span style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)' }}>
+            {serverOnline ? 'SECURE GATEWAY: ONLINE' : 'GATEWAY: OFFLINE'}
           </span>
         </div>
       </div>

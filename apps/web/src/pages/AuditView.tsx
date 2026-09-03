@@ -1,46 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AuditEvent } from '@deputy/domain';
-import {
-  ScrollText,
-  CheckCircle2,
-  XCircle,
-  Info,
-  ShieldCheck,
-  RefreshCw,
-  ExternalLink,
-} from 'lucide-react';
+import { ScrollText, Search, Eye, RefreshCw, Download } from 'lucide-react';
 import { Badge } from '../components/ui/Badge.js';
 import { EmptyState } from '../components/ui/EmptyState.js';
 import { Surface } from '../components/ui/Surface.js';
+import { Drawer } from '../components/ui/Drawer.js';
+import { ProvenanceBadge } from '../components/ui/ProvenanceBadge.js';
+import { useToast } from '../context/ToastContext.js';
 
 interface AuditViewProps {
-  events: AuditEvent[];
+  auditEvents: AuditEvent[];
   onRefresh: () => void;
 }
 
-export const AuditView: React.FC<AuditViewProps> = ({ events, onRefresh }) => {
-  const [selectedFilter, setSelectedFilter] = useState<string>('ALL');
+export const AuditView: React.FC<AuditViewProps> = ({ auditEvents, onRefresh }) => {
+  const { showToast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);
 
-  // Filter events
-  const filteredEvents = events.filter(e => {
-    if (selectedFilter === 'ALL') return true;
-    if (selectedFilter === 'EXECUTION') return e.eventType.includes('EXECUTE');
-    if (selectedFilter === 'AUTHORIZATION') return e.eventType.includes('AUTHORIZATION');
-    if (selectedFilter === 'REFUSED')
-      return e.eventType.includes('REFUSED') || e.status === 'FAILURE';
-    return true;
-  });
+  const uniqueEventTypes = useMemo(() => {
+    const set = new Set<string>();
+    for (const ev of auditEvents) {
+      if (ev.eventType) set.add(ev.eventType);
+    }
+    return Array.from(set);
+  }, [auditEvents]);
+
+  const filteredEvents = useMemo(() => {
+    return auditEvents.filter(ev => {
+      if (typeFilter !== 'ALL' && ev.eventType !== typeFilter) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchId = ev.eventId.toLowerCase().includes(q);
+        const matchType = ev.eventType.toLowerCase().includes(q);
+        const matchActor = ev.actor.id.toLowerCase().includes(q);
+        const matchSession = ev.sessionId ? ev.sessionId.toLowerCase().includes(q) : false;
+        const matchReq = ev.requestId ? ev.requestId.toLowerCase().includes(q) : false;
+        if (!matchId && !matchType && !matchActor && !matchSession && !matchReq) return false;
+      }
+      return true;
+    });
+  }, [auditEvents, typeFilter, searchQuery]);
+
+  const exportAuditLog = () => {
+    const dataStr =
+      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(filteredEvents, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `deputy_audit_trail_${Date.now()}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    showToast(
+      'success',
+      'Audit Exported',
+      `Exported ${filteredEvents.length} cryptographic audit events.`,
+    );
+  };
 
   return (
     <div className="page-body">
       {/* Header */}
       <div
         className="page-header"
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span
               style={{
                 fontSize: '0.72rem',
@@ -50,7 +83,7 @@ export const AuditView: React.FC<AuditViewProps> = ({ events, onRefresh }) => {
                 fontWeight: 700,
               }}
             >
-              CRYPTOGRAPHIC EVIDENCE
+              SECURITY FORENSICS
             </span>
             <span style={{ color: 'var(--border-strong)' }}>/</span>
             <span
@@ -60,372 +93,387 @@ export const AuditView: React.FC<AuditViewProps> = ({ events, onRefresh }) => {
                 fontFamily: 'var(--font-mono)',
               }}
             >
-              SHA-256 HASH CHAIN
+              SHA-256 APPEND-ONLY LEDGER
             </span>
           </div>
           <h1 className="page-title">Cryptographic Audit Trail</h1>
           <p className="page-description">
-            Immutable, append-only ledger of demonstrations, tool syntheses, agent proposals,
-            WebAuthn authorizations, and atomic executions.
+            Append-only, immutable forensic event stream. Every demonstration, tool synthesis,
+            passkey authorization, and execution is sealed with cryptographic hashes.
           </p>
         </div>
 
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={onRefresh}
-          style={{ gap: '6px' }}
-        >
-          <RefreshCw size={13} />
-          <span>Refresh Ledger</span>
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={onRefresh}
+            style={{ gap: 5 }}
+          >
+            <RefreshCw size={13} />
+            <span>Refresh Stream</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={exportAuditLog}
+            style={{ gap: 5 }}
+          >
+            <Download size={13} />
+            <span>Export Forensic JSON</span>
+          </button>
+        </div>
       </div>
 
-      {/* Hash Chain Integrity Banner */}
-      <Surface level={2} style={{ marginBottom: '20px', padding: '14px 18px' }}>
+      {/* Invariant 6 & 7 Banner */}
+      <Surface level={2} style={{ marginBottom: 20, padding: '12px 18px' }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '12px',
+            gap: 12,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div
               style={{
                 width: 32,
                 height: 32,
                 borderRadius: 'var(--radius-sm)',
-                background: 'rgba(16, 185, 129, 0.12)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
+                background: 'rgba(56, 189, 248, 0.12)',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--semantic-emerald)',
+                color: 'var(--semantic-audit)',
               }}
             >
-              <ShieldCheck size={18} />
+              <ScrollText size={16} />
             </div>
             <div>
-              <div
-                style={{
-                  fontWeight: 600,
-                  fontSize: '0.88rem',
-                  color: 'var(--text-primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
-              >
-                <span>Cryptographic Hash Chain: Verified & Unbroken</span>
-                <span className="status-dot active" />
+              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-primary)' }}>
+                Invariant 6 & 7: Append-Only Cryptographic Audit & Provenance Sealing
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                Every record is bound to its predecessor via SHA-256 HMAC digest. Any retroactive
-                modification breaks the chain.
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
+                Ledger records are strictly append-only. Modification of past events is
+                mathematically impossible without breaking the SHA-256 chain integrity.
               </div>
             </div>
           </div>
-
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Badge variant="active">GENESIS LINKED</Badge>
-            <Badge variant="auth">APPEND-ONLY</Badge>
-          </div>
+          <Badge variant="active">{auditEvents.length} IMMUTABLE EVENTS RECORDED</Badge>
         </div>
       </Surface>
 
-      {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-        {['ALL', 'EXECUTION', 'AUTHORIZATION', 'REFUSED'].map(filter => (
-          <button
-            key={filter}
-            type="button"
-            className={`btn ${selectedFilter === filter ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ fontSize: '0.76rem', padding: '4px 10px' }}
-            onClick={() => setSelectedFilter(filter)}
+      {/* Filter and Search Bar */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        <div style={{ position: 'relative', width: '100%', maxWidth: 360 }}>
+          <Search
+            size={14}
+            style={{
+              position: 'absolute',
+              left: 10,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--text-muted)',
+            }}
+          />
+          <input
+            type="text"
+            className="form-input"
+            style={{ paddingLeft: 32, fontSize: '0.82rem' }}
+            placeholder="Search events by type, actor, or ID..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {uniqueEventTypes.length > 0 && (
+          <select
+            className="form-select"
+            style={{ width: 'auto', padding: '4px 10px', fontSize: '0.76rem' }}
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value)}
           >
-            {filter} (
-            {filter === 'ALL'
-              ? events.length
-              : events.filter(e =>
-                  filter === 'EXECUTION'
-                    ? e.eventType.includes('EXECUTE')
-                    : filter === 'AUTHORIZATION'
-                      ? e.eventType.includes('AUTHORIZATION')
-                      : e.eventType.includes('REFUSED') || e.status === 'FAILURE',
-                ).length}
-            )
-          </button>
-        ))}
+            <option value="ALL">All Event Types ({uniqueEventTypes.length})</option>
+            {uniqueEventTypes.map(t => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
-      {/* Audit Log Stream */}
+      {/* Forensic Audit Events Table */}
       <Surface
         level={2}
-        headerTitle="Audit Log Stream"
-        headerMeta={`${filteredEvents.length} RECORDS`}
         noPadding
+        headerTitle="Forensic Event Ledger"
+        headerMeta={`${filteredEvents.length} EVENTS`}
       >
         {filteredEvents.length === 0 ? (
-          <div style={{ padding: '24px' }}>
+          <div style={{ padding: 36 }}>
             <EmptyState
-              icon={<ScrollText size={20} />}
+              icon={<ScrollText size={22} />}
               title="No Audit Records Found"
-              description="No audit events matched the selected filter."
+              description="Actions executed in the Operations Console or synthesized in the Studio emit cryptographic audit events."
             />
           </div>
         ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Event Type</th>
-                <th>Status</th>
-                <th>Actor</th>
-                <th>Target Tool</th>
-                <th>Request ID</th>
-                <th>Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEvents.map(event => (
-                <tr
-                  key={event.eventId}
-                  onClick={() => setSelectedEvent(event)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <td className="mono" style={{ fontSize: '0.76rem' }}>
-                    {new Date(event.timestamp).toLocaleTimeString()}
-                  </td>
-                  <td>
-                    <Badge
-                      variant={
-                        event.eventType.includes('EXECUTE')
-                          ? 'active'
-                          : event.eventType.includes('AUTHORIZATION')
-                            ? 'auth'
-                            : event.eventType.includes('REFUSED')
-                              ? 'risk-critical'
-                              : 'neutral'
-                      }
-                    >
-                      {event.eventType}
-                    </Badge>
-                  </td>
-                  <td>
-                    {event.status === 'SUCCESS' ? (
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          color: 'var(--semantic-emerald)',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                        }}
-                      >
-                        <CheckCircle2 size={13} /> SUCCESS
-                      </span>
-                    ) : event.status === 'FAILURE' ? (
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          color: 'var(--semantic-danger)',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                        }}
-                      >
-                        <XCircle size={13} /> FAILURE
-                      </span>
-                    ) : (
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          color: 'var(--text-secondary)',
-                          fontSize: '0.78rem',
-                        }}
-                      >
-                        <Info size={13} /> INFO
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: 500, fontSize: '0.82rem' }}>{event.actor.id}</div>
-                    <div
-                      className="mono"
-                      style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}
-                    >
-                      {event.actor.type}
-                    </div>
-                  </td>
-                  <td>
-                    <span
-                      className="mono"
-                      style={{
-                        fontSize: '0.78rem',
-                        color: event.toolId ? 'var(--semantic-webmcp)' : 'var(--text-muted)',
-                      }}
-                    >
-                      {event.toolId || '—'}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className="mono"
-                      style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}
-                    >
-                      {event.requestId ? event.requestId.slice(0, 16) + '...' : '—'}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      style={{ fontSize: '0.72rem', padding: '3px 8px' }}
-                      onClick={e => {
-                        e.stopPropagation();
-                        setSelectedEvent(event);
-                      }}
-                    >
-                      Inspect <ExternalLink size={11} />
-                    </button>
-                  </td>
+          <div className="data-table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Event Type & ID</th>
+                  <th>Timestamp</th>
+                  <th>Actor ID</th>
+                  <th>Status</th>
+                  <th>Hash Digest</th>
+                  <th>Provenance</th>
+                  <th>Inspect</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredEvents.map(ev => {
+                  const isSelected = selectedEvent?.eventId === ev.eventId;
+                  const trustClass = ev.provenance?.trustClass || 'FIRST_PARTY';
+
+                  return (
+                    <tr
+                      key={ev.eventId}
+                      className={`clickable ${isSelected ? 'selected' : ''}`}
+                      onClick={() => setSelectedEvent(ev)}
+                    >
+                      <td>
+                        <div
+                          className="mono"
+                          style={{
+                            fontWeight: 600,
+                            color: 'var(--text-primary)',
+                            fontSize: '0.84rem',
+                          }}
+                        >
+                          {ev.eventType}
+                        </div>
+                        <div
+                          className="mono"
+                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}
+                        >
+                          {ev.eventId}
+                        </div>
+                      </td>
+
+                      <td>
+                        <span
+                          className="mono"
+                          style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}
+                        >
+                          {new Date(ev.timestamp).toLocaleTimeString()}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div
+                          className="mono"
+                          style={{ fontSize: '0.78rem', color: 'var(--text-primary)' }}
+                        >
+                          {ev.actor.id}
+                        </div>
+                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                          {ev.actor.type} ({ev.actor.role})
+                        </div>
+                      </td>
+
+                      <td>
+                        <Badge
+                          variant={
+                            ev.status === 'SUCCESS'
+                              ? 'active'
+                              : ev.status === 'FAILURE'
+                                ? 'risk-critical'
+                                : 'draft'
+                          }
+                        >
+                          {ev.status}
+                        </Badge>
+                      </td>
+
+                      <td>
+                        <span
+                          className="mono"
+                          style={{ fontSize: '0.72rem', color: 'var(--semantic-audit)' }}
+                        >
+                          {ev.eventHash ? `${ev.eventHash.slice(0, 12)}...` : 'SEALED'}
+                        </span>
+                      </td>
+
+                      <td>
+                        <ProvenanceBadge trustClass={trustClass} compact />
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          style={{ padding: '2px 6px', fontSize: '0.72rem' }}
+                          onClick={e => {
+                            e.stopPropagation();
+                            setSelectedEvent(ev);
+                          }}
+                        >
+                          <Eye size={11} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </Surface>
 
-      {/* Selected Event Payload Modal */}
-      {selectedEvent && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-          }}
-          onClick={() => setSelectedEvent(null)}
-        >
-          <div
-            style={{
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border-strong)',
-              borderRadius: 'var(--radius-md)',
-              width: '90%',
-              maxWidth: '680px',
-              padding: '24px',
-              boxShadow: 'var(--shadow-lg)',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
+      {/* Slide-Over Forensic Event Detail Drawer */}
+      <Drawer
+        isOpen={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        title={selectedEvent?.eventType || 'Audit Event'}
+        subtitle={`Event ID: ${selectedEvent?.eventId}`}
+        headerBadge={<Badge variant="auth">SHA-256 SEALED</Badge>}
+      >
+        {selectedEvent && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Metadata grid */}
             <div
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 8,
+                fontSize: '0.78rem',
               }}
             >
               <div>
-                <div
-                  style={{
-                    fontSize: '0.74rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    color: 'var(--semantic-audit)',
-                    fontWeight: 700,
-                  }}
-                >
-                  EVENT RECORD DETAILS
-                </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Event Type: </span>
+                <span className="mono" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                   {selectedEvent.eventType}
-                </h3>
-              </div>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: '0.76rem', padding: '4px 10px' }}
-                onClick={() => setSelectedEvent(null)}
-              >
-                Close
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                marginBottom: '14px',
-                fontSize: '0.8rem',
-              }}
-            >
-              <div>
-                Event ID: <span className="mono">{selectedEvent.eventId}</span>
-              </div>
-              <div>
-                Timestamp:{' '}
-                <span className="mono">{new Date(selectedEvent.timestamp).toISOString()}</span>
-              </div>
-              <div>
-                Actor:{' '}
-                <span className="mono">
-                  {selectedEvent.actor.id} ({selectedEvent.actor.type})
                 </span>
               </div>
-              {selectedEvent.reason && (
-                <div>
-                  Reason:{' '}
-                  <span style={{ color: 'var(--semantic-amber)' }}>{selectedEvent.reason}</span>
-                </div>
-              )}
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Status: </span>
+                <Badge variant={selectedEvent.status === 'SUCCESS' ? 'active' : 'risk-critical'}>
+                  {selectedEvent.status}
+                </Badge>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Session ID: </span>
+                <span className="mono">{selectedEvent.sessionId || 'N/A'}</span>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Request ID: </span>
+                <span className="mono">{selectedEvent.requestId || 'N/A'}</span>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Actor: </span>
+                <span className="mono">
+                  {selectedEvent.actor.id} ({selectedEvent.actor.role})
+                </span>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Timestamp: </span>
+                <span className="mono">{new Date(selectedEvent.timestamp).toLocaleString()}</span>
+              </div>
             </div>
 
+            {/* Cryptographic Hash Chaining */}
             <div
               style={{
-                fontSize: '0.74rem',
-                textTransform: 'uppercase',
-                color: 'var(--text-muted)',
-                fontWeight: 600,
-                marginBottom: '6px',
-              }}
-            >
-              Cryptographic Event Metadata & Arguments
-            </div>
-            <pre
-              className="mono"
-              style={{
-                background: 'var(--surface-0)',
-                border: '1px solid var(--border-subtle)',
+                background: 'var(--surface-2)',
+                padding: 12,
                 borderRadius: 'var(--radius-sm)',
-                padding: '12px',
-                fontSize: '0.76rem',
-                color: '#cbd5e1',
-                maxHeight: '260px',
-                overflowY: 'auto',
+                border: '1px solid var(--border-subtle)',
               }}
             >
-              {JSON.stringify(selectedEvent.metadata || selectedEvent, null, 2)}
-            </pre>
+              <div
+                style={{
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  color: 'var(--text-muted)',
+                  fontWeight: 700,
+                  marginBottom: 6,
+                }}
+              >
+                Cryptographic Integrity Hashes
+              </div>
+              <div
+                style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.74rem' }}
+              >
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>Event Hash: </span>
+                  <span
+                    className="mono"
+                    style={{ color: 'var(--semantic-emerald)', wordBreak: 'break-all' }}
+                  >
+                    {selectedEvent.eventHash || 'SHA-256 Validated'}
+                  </span>
+                </div>
+                {selectedEvent.previousEventHash && (
+                  <div>
+                    <span style={{ color: 'var(--text-muted)' }}>Previous Hash: </span>
+                    <span
+                      className="mono"
+                      style={{ color: 'var(--text-secondary)', wordBreak: 'break-all' }}
+                    >
+                      {selectedEvent.previousEventHash}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Event Metadata Payload */}
+            <div>
+              <div
+                style={{
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  color: 'var(--text-muted)',
+                  fontWeight: 700,
+                  marginBottom: 4,
+                }}
+              >
+                Event Metadata Payload
+              </div>
+              <pre
+                className="mono"
+                style={{
+                  background: 'var(--surface-0)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: 14,
+                  fontSize: '0.75rem',
+                  color: '#cbd5e1',
+                  maxHeight: 280,
+                  overflowY: 'auto',
+                }}
+              >
+                {JSON.stringify(selectedEvent.metadata || {}, null, 2)}
+              </pre>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </Drawer>
     </div>
   );
 };
