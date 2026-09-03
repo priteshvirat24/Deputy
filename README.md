@@ -1,5 +1,9 @@
 # DEPUTY
 
+[![DEPUTY CI Gate](https://github.com/priteshvirat24/Deputy/actions/workflows/ci.yml/badge.svg)](https://github.com/priteshvirat24/Deputy/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-151%20passing-brightgreen.svg)](https://github.com/priteshvirat24/Deputy/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/typescript-strict-blue.svg)](https://www.typescriptlang.org/)
+
 > **A human demonstrates a task once. DEPUTY converts that demonstration into a typed, parameterized WebMCP capability that an agent can use afterward, while dangerous actions remain cryptographically bound to explicit human authorization backed by hardware passkeys.**
 
 ---
