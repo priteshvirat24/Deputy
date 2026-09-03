@@ -24,9 +24,9 @@ export class ActionTrace3D {
     const lineGeo = new THREE.BufferGeometry().setFromPoints(curvePoints);
 
     const lineMat = new THREE.LineBasicMaterial({
-      color: 0x06b6d4,
+      color: 0x0891b2,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.85,
       linewidth: 2,
     });
 
@@ -34,11 +34,11 @@ export class ActionTrace3D {
     this.group.add(this.curveLine);
 
     // 3 semantic action nodes
-    const nodeGeo = new THREE.SphereGeometry(0.12, 16, 16);
+    const nodeGeo = new THREE.SphereGeometry(0.14, 16, 16);
     const nodeMat = new THREE.MeshBasicMaterial({
-      color: 0x22d3ee,
+      color: 0x0891b2,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.95,
     });
 
     for (let i = 0; i < 3; i++) {
@@ -47,11 +47,11 @@ export class ActionTrace3D {
       this.group.add(mesh);
 
       // Glow shell
-      const pulseGeo = new THREE.SphereGeometry(0.2, 16, 16);
+      const pulseGeo = new THREE.SphereGeometry(0.22, 16, 16);
       const pulseMat = new THREE.MeshBasicMaterial({
         color: 0x06b6d4,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.4,
         wireframe: true,
       });
       const pulseMesh = new THREE.Mesh(pulseGeo, pulseMat);

@@ -11,16 +11,16 @@ export class AuditChain3D {
 
     const boxGeo = new THREE.BoxGeometry(0.7, 0.45, 0.45);
     const boxMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
-      roughness: 0.2,
-      metalness: 0.8,
+      color: 0x1e293b,
+      roughness: 0.3,
+      metalness: 0.6,
       wireframe: false,
     });
 
     const edgeMat = new THREE.LineBasicMaterial({
-      color: 0x38bdf8,
+      color: 0x0891b2,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
     });
 
     for (let i = 0; i < this.numBlocks; i++) {
@@ -49,9 +49,9 @@ export class AuditChain3D {
         new THREE.Vector3(xPos, yPos, zPos),
       ]);
       const lineMat = new THREE.LineBasicMaterial({
-        color: 0x06b6d4,
+        color: 0x7c3aed,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.75,
       });
       const line = new THREE.Line(lineGeo, lineMat);
       this.connectorLines.push(line);

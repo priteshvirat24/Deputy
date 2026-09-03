@@ -39,10 +39,11 @@ export const CinematicText: React.FC<CinematicTextProps> = ({ scene, sceneProgre
           display: 'inline-flex',
           alignItems: 'center',
           gap: 6,
-          padding: '2px 8px',
+          padding: '3px 9px',
           borderRadius: '4px',
-          background: 'rgba(255, 255, 255, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
           fontSize: '0.68rem',
           fontFamily: 'var(--font-mono)',
           fontWeight: 700,
@@ -54,23 +55,22 @@ export const CinematicText: React.FC<CinematicTextProps> = ({ scene, sceneProgre
       >
         <span
           style={{
-            width: 5,
-            height: 5,
+            width: 6,
+            height: 6,
             borderRadius: '50%',
             background: scene.semanticColor,
-            boxShadow: `0 0 8px ${scene.semanticColor}`,
           }}
         />
         <span>{scene.technicalLabel}</span>
       </div>
 
-      {/* Primary Statement */}
+      {/* Primary Statement (Crisp on White) */}
       <h2
         style={{
-          fontSize: 'clamp(1.5rem, 3.2vw, 2.4rem)',
+          fontSize: 'clamp(1.6rem, 3.4vw, 2.5rem)',
           fontWeight: 800,
           letterSpacing: '-0.03em',
-          color: '#ffffff',
+          color: '#09090b',
           lineHeight: 1.15,
           marginBottom: 6,
         }}
@@ -81,7 +81,7 @@ export const CinematicText: React.FC<CinematicTextProps> = ({ scene, sceneProgre
       {/* Tagline */}
       <div
         style={{
-          fontSize: 'clamp(0.95rem, 1.4vw, 1.2rem)',
+          fontSize: 'clamp(0.95rem, 1.4vw, 1.25rem)',
           fontWeight: 600,
           color: scene.semanticColor,
           marginBottom: 8,
@@ -94,9 +94,9 @@ export const CinematicText: React.FC<CinematicTextProps> = ({ scene, sceneProgre
       {/* Supporting text */}
       <p
         style={{
-          fontSize: 'clamp(0.8rem, 1.1vw, 0.92rem)',
-          color: '#94a3b8',
-          lineHeight: 1.5,
+          fontSize: 'clamp(0.84rem, 1.1vw, 0.95rem)',
+          color: '#52525b',
+          lineHeight: 1.55,
           maxWidth: '480px',
         }}
       >
