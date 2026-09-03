@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  ActionRegistry,
-  GENESIS_HASH,
-  InMemoryAuditRepository,
-} from '@deputy/database';
+import { ActionRegistry, GENESIS_HASH, InMemoryAuditRepository } from '@deputy/database';
 import { AuditEvent, Authorization, LearnedTool, ToolProposal } from '@deputy/domain';
 import {
   computeArgumentDigest,
