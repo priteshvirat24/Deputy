@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ExternalLink,
   ArrowRight,
+  Film,
 } from 'lucide-react';
 import { AuditEvent, Authorization, LearnedTool } from '@deputy/domain';
 import { PasskeyAuthModal } from '../components/PasskeyAuthModal.js';
@@ -26,6 +27,7 @@ interface DashboardViewProps {
   auditEvents?: AuditEvent[];
   onRefresh?: () => void;
   onNavigateTab?: (tab: string) => void;
+  onOpenCinematic?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -36,6 +38,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   auditEvents = [],
   onRefresh,
   onNavigateTab,
+  onOpenCinematic,
 }) => {
   // Authorizations state
   const [authorizations, setAuthorizations] = useState<Authorization[]>([]);
@@ -255,16 +258,39 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </p>
         </div>
 
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={runCanonicalScenario}
-          disabled={demoRunning}
-          style={{ gap: '8px', padding: '8px 16px' }}
-        >
-          <Play size={14} fill="currentColor" />
-          <span>{demoRunning ? `Executing Step ${demoStep}/9...` : 'Run Canonical Demo'}</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {onOpenCinematic && (
+            <button
+              type="button"
+              className="btn btn-accent"
+              onClick={onOpenCinematic}
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(129, 140, 248, 0.3), rgba(6, 182, 212, 0.3))',
+                border: '1px solid rgba(129, 140, 248, 0.5)',
+                color: '#ffffff',
+                gap: '8px',
+                padding: '8px 16px',
+                fontWeight: 700,
+              }}
+              title="Launch 3D Cinematic Judge Experience (35s Film / ⌘J)"
+            >
+              <Film size={14} style={{ color: '#c7d2fe' }} />
+              <span>3D Cinematic Story</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={runCanonicalScenario}
+            disabled={demoRunning}
+            style={{ gap: '8px', padding: '8px 16px' }}
+          >
+            <Play size={14} fill="currentColor" />
+            <span>{demoRunning ? `Executing Step ${demoStep}/9...` : 'Run Canonical Demo'}</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Primary Technical Metrics Grid */}

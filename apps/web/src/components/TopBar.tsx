@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Shield, Cpu, Lock, User, Terminal } from 'lucide-react';
+import { Search, Shield, Cpu, Lock, User, Terminal, Sparkles } from 'lucide-react';
 import { detectWebMCPSupport } from '@deputy/webmcp';
 import { ActiveRecordingState } from './RecordingBar.js';
 
 interface TopBarProps {
   onOpenCommandPalette: () => void;
+  onOpenCinematic?: () => void;
   recording: ActiveRecordingState | null;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording }) => {
+export const TopBar: React.FC<TopBarProps> = ({
+  onOpenCommandPalette,
+  onOpenCinematic,
+  recording,
+}) => {
   const [serverOnline, setServerOnline] = useState(true);
   const [webmcpAvailable, setWebmcpAvailable] = useState(false);
 
@@ -34,7 +39,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording 
 
   return (
     <header className="top-command-bar">
-      {/* Left: Global Command Palette Trigger */}
+      {/* Left: Global Command Palette Trigger & Cinematic Launcher */}
       <div className="top-bar-left">
         <button
           type="button"
@@ -59,6 +64,28 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording 
           </div>
           <span className="command-palette-kbd">⌘K</span>
         </button>
+
+        {/* 3D Cinematic Story Launcher Button */}
+        {onOpenCinematic && (
+          <button
+            type="button"
+            className="btn btn-accent btn-sm"
+            onClick={onOpenCinematic}
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(129, 140, 248, 0.25), rgba(6, 182, 212, 0.25))',
+              border: '1px solid rgba(129, 140, 248, 0.4)',
+              color: '#ffffff',
+              gap: 6,
+              padding: '5px 12px',
+              fontWeight: 700,
+            }}
+            title="Launch 3D Cinematic Judge Experience (35s Film / ⌘J)"
+          >
+            <Sparkles size={13} style={{ color: '#c7d2fe' }} />
+            <span>3D Film (35s)</span>
+          </button>
+        )}
 
         {/* Workspace context */}
         <div

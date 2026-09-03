@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Settings,
   Shield,
+  Film,
 } from 'lucide-react';
 
 export type ActiveTab =
@@ -32,6 +33,7 @@ export type ActiveTab =
 interface SidebarProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
+  onOpenCinematic?: () => void;
   pendingAuthCount?: number;
   activeToolCount?: number;
 }
@@ -39,6 +41,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
+  onOpenCinematic,
   pendingAuthCount = 0,
   activeToolCount = 0,
 }) => {
@@ -59,6 +62,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Nav Groups */}
       <ul className="nav-groups">
+        {/* CINEMATIC STORY EXPERIENCE */}
+        {onOpenCinematic && (
+          <li>
+            <div className="nav-group-label">EXPERIENCE</div>
+            <ul className="nav-items">
+              <li
+                className="nav-item"
+                onClick={onOpenCinematic}
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(129, 140, 248, 0.12), rgba(6, 182, 212, 0.12))',
+                  border: '1px solid rgba(129, 140, 248, 0.25)',
+                  color: '#ffffff',
+                }}
+              >
+                <Film size={15} className="nav-icon" style={{ color: '#818cf8' }} />
+                <span style={{ fontWeight: 600 }}>3D Cinematic Film</span>
+                <span
+                  className="mono"
+                  style={{
+                    fontSize: '0.65rem',
+                    background: 'rgba(129, 140, 248, 0.25)',
+                    padding: '1px 5px',
+                    borderRadius: 'var(--radius-xs)',
+                    color: '#c7d2fe',
+                    marginLeft: 'auto',
+                  }}
+                >
+                  35s
+                </span>
+              </li>
+            </ul>
+          </li>
+        )}
+
         {/* COMMAND */}
         <li>
           <div className="nav-group-label">COMMAND</div>

@@ -8,6 +8,7 @@ import {
 import { ActiveTab, Sidebar } from './components/Sidebar.js';
 import { TopBar } from './components/TopBar.js';
 import { CommandPalette } from './components/ui/CommandPalette.js';
+import { DeputyCinematicExperience } from './components/cinematic/DeputyCinematicExperience.js';
 import { ToastProvider, useToast } from './context/ToastContext.js';
 
 // Pages
@@ -31,10 +32,10 @@ const AppInner: React.FC = () => {
   const [demonstrations, setDemonstrations] = useState<Demonstration[]>([]);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [authorizations, setAuthorizations] = useState<Authorization[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Global Command Palette state
+  // Global Command Palette & Cinematic Film state
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isCinematicOpen, setIsCinematicOpen] = useState(false);
 
   // Active recording session
   const [recording, setRecording] = useState<ActiveRecordingState | null>(null);
@@ -70,8 +71,6 @@ const AppInner: React.FC = () => {
       }
     } catch (err) {
       console.warn('Backend connection notice', err);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -79,12 +78,15 @@ const AppInner: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  // Global ⌘K Keyboard Shortcut Listener
+  // Global ⌘K and ⌘J Keyboard Shortcut Listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCommandPaletteOpen(prev => !prev);
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'j') {
+        e.preventDefault();
+        setIsCinematicOpen(prev => !prev);
       }
     };
 
@@ -118,92 +120,107 @@ const AppInner: React.FC = () => {
           `Live recording session initialized for "${taskDescription}".`,
         );
       }
-    } catch {
-      showToast('error', 'Recording Error', 'Failed to start demonstration session.');
+    } catch (err) {
+      console.error('Failed to start recording', err);
+      showToast('error', 'Recording Failed', String(err));
     }
   };
 
   const handlePauseRecording = async () => {
     if (!recording) return;
     try {
-      await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/pause`, {
+      const res = await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/pause`, {
         method: 'POST',
       });
-      setRecording(prev => (prev ? { ...prev, status: 'PAUSED' } : null));
-      showToast('amber', 'Recording Paused', 'Action observation paused.');
-    } catch {
-      showToast('error', 'Error', 'Failed to pause recording.');
+      if (res.ok) {
+        setRecording(prev => (prev ? { ...prev, status: 'PAUSED' } : null));
+        showToast('amber', 'Recording Paused', 'Semantic trace capture paused.');
+      }
+    } catch (err) {
+      console.error('Failed to pause recording', err);
     }
   };
 
   const handleResumeRecording = async () => {
     if (!recording) return;
     try {
-      await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/resume`, {
+      const res = await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/resume`, {
         method: 'POST',
       });
-      setRecording(prev => (prev ? { ...prev, status: 'RECORDING' } : null));
-      showToast('auth', 'Recording Resumed', 'Live capture active.');
-    } catch {
-      showToast('error', 'Error', 'Failed to resume recording.');
+      if (res.ok) {
+        setRecording(prev => (prev ? { ...prev, status: 'RECORDING' } : null));
+        showToast('auth', 'Recording Resumed', 'Semantic trace capture active.');
+      }
+    } catch (err) {
+      console.error('Failed to resume recording', err);
     }
   };
 
   const handleCompleteRecording = async () => {
     if (!recording) return;
     try {
-      await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/complete`, {
-        method: 'POST',
-      });
-      showToast(
-        'success',
-        'Demonstration Completed',
-        `Recorded trace with ${recording.actionCount} action(s).`,
+      const res = await fetch(
+        `/api/demonstrations/${recording.demonstrationId}/recording/complete`,
+        {
+          method: 'POST',
+        },
       );
-      setRecording(null);
-      await fetchData();
-      setActiveTab('synthesis');
-    } catch {
-      showToast('error', 'Error', 'Failed to complete recording.');
+      if (res.ok) {
+        showToast(
+          'success',
+          'Demonstration Recorded',
+          `Successfully saved demonstration with ${recording.actionCount} action steps.`,
+        );
+        setRecording(null);
+        await fetchData();
+        setActiveTab('demonstrations');
+      }
+    } catch (err) {
+      console.error('Failed to complete recording', err);
+      showToast('error', 'Save Failed', String(err));
     }
   };
 
   const handleDiscardRecording = async () => {
     if (!recording) return;
     try {
-      await fetch(`/api/demonstrations/${recording.demonstrationId}/recording/discard`, {
-        method: 'POST',
-      });
-      showToast('amber', 'Demonstration Discarded', 'In-flight recording session cleared.');
-      setRecording(null);
-      await fetchData();
-    } catch {
-      showToast('error', 'Error', 'Failed to discard recording.');
+      const res = await fetch(
+        `/api/demonstrations/${recording.demonstrationId}/recording/discard`,
+        {
+          method: 'POST',
+        },
+      );
+      if (res.ok) {
+        showToast('amber', 'Recording Discarded', 'Demonstration trace discarded.');
+        setRecording(null);
+      }
+    } catch (err) {
+      console.error('Failed to discard recording', err);
     }
   };
 
   const handleActionObserved = (actionType: string, summary: string) => {
-    if (!recording) return;
-    const newTraceItem: RecordedActionItem = {
+    if (!recording || recording.status === 'PAUSED') return;
+    const item: RecordedActionItem = {
       actionType,
       summary,
       sequenceNumber: recording.actionCount + 1,
       timestamp: new Date().toISOString(),
     };
-
-    setRecording(prev =>
-      prev
-        ? {
-            ...prev,
-            actionCount: prev.actionCount + 1,
-            actionTrace: [...(prev.actionTrace || []), newTraceItem],
-            lastAction: { actionType, summary },
-          }
-        : null,
-    );
+    setRecording(prev => {
+      if (!prev) return null;
+      const trace = prev.actionTrace ? [...prev.actionTrace, item] : [item];
+      return {
+        ...prev,
+        actionCount: prev.actionCount + 1,
+        actionTrace: trace,
+        lastAction: { actionType, summary },
+      };
+    });
   };
 
-  const pendingAuths = authorizations.filter(a => a.status === 'PENDING');
+  const pendingAuthCount = authorizations.filter(a => a.status === 'PENDING').length;
+  const activeToolCount = tools.filter(t => t.status === 'ACTIVE').length;
 
   return (
     <div className="app-container">
@@ -211,25 +228,21 @@ const AppInner: React.FC = () => {
       <Sidebar
         activeTab={activeTab}
         onSelectTab={setActiveTab}
-        pendingAuthCount={pendingAuths.length}
-        activeToolCount={tools.filter(t => t.status === 'ACTIVE').length}
+        onOpenCinematic={() => setIsCinematicOpen(true)}
+        pendingAuthCount={pendingAuthCount}
+        activeToolCount={activeToolCount}
       />
 
-      {/* Main Content Workspace */}
+      {/* Main Layout Area */}
       <div className="main-content">
-        <TopBar onOpenCommandPalette={() => setIsCommandPaletteOpen(true)} recording={recording} />
+        {/* Top Technical Status & Command Bar */}
+        <TopBar
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+          onOpenCinematic={() => setIsCinematicOpen(true)}
+          recording={recording}
+        />
 
-        {loading && (
-          <div
-            style={{
-              height: 2,
-              background: 'linear-gradient(90deg, transparent, var(--semantic-auth), transparent)',
-              animation: 'skeleton-shimmer 1.5s infinite',
-            }}
-          />
-        )}
-
-        {/* Global Precision Recording Capture Instrument */}
+        {/* Live Precision Recording Instrument Bar */}
         <RecordingBar
           recording={recording}
           onStart={handleStartRecording}
@@ -239,7 +252,7 @@ const AppInner: React.FC = () => {
           onDiscard={handleDiscardRecording}
         />
 
-        {/* View Routing */}
+        {/* View Surface Content Router */}
         <main style={{ flex: 1, overflowY: 'auto' }}>
           {activeTab === 'dashboard' && (
             <DashboardView
@@ -250,6 +263,7 @@ const AppInner: React.FC = () => {
               auditEvents={auditEvents}
               onRefresh={fetchData}
               onNavigateTab={tab => setActiveTab(tab as ActiveTab)}
+              onOpenCinematic={() => setIsCinematicOpen(true)}
             />
           )}
 
@@ -306,10 +320,17 @@ const AppInner: React.FC = () => {
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
         onSelectTab={tab => setActiveTab(tab)}
+        onOpenCinematic={() => setIsCinematicOpen(true)}
         tools={tools}
         demonstrations={demonstrations}
         auditEvents={auditEvents}
         authorizations={authorizations}
+      />
+
+      {/* 3D Cinematic Judge Experience Modal (Three.js WebGL Film) */}
+      <DeputyCinematicExperience
+        isOpen={isCinematicOpen}
+        onClose={() => setIsCinematicOpen(false)}
       />
     </div>
   );

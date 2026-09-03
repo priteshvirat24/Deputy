@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   Settings,
   ArrowRight,
+  Film,
 } from 'lucide-react';
 import { LearnedTool, Demonstration, AuditEvent, Authorization } from '@deputy/domain';
 import { ActiveTab } from '../Sidebar.js';
@@ -20,6 +21,7 @@ export interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectTab: (tab: ActiveTab) => void;
+  onOpenCinematic?: () => void;
   tools?: LearnedTool[];
   demonstrations?: Demonstration[];
   auditEvents?: AuditEvent[];
@@ -30,7 +32,7 @@ export interface CommandPaletteProps {
 
 interface CommandItem {
   id: string;
-  category: 'PAGES' | 'TOOLS' | 'DEMONSTRATIONS' | 'AUTHORIZATIONS' | 'AUDIT';
+  category: 'CINEMATIC' | 'PAGES' | 'TOOLS' | 'DEMONSTRATIONS' | 'AUTHORIZATIONS' | 'AUDIT';
   title: string;
   subtitle?: string;
   icon: React.ReactNode;
@@ -41,6 +43,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   isOpen,
   onClose,
   onSelectTab,
+  onOpenCinematic,
   tools = [],
   demonstrations = [],
   authorizations = [],
@@ -57,8 +60,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         e.preventDefault();
         if (isOpen) {
           onClose();
-        } else {
-          // Trigger open via parent
         }
       }
       if (e.key === 'Escape' && isOpen) {
@@ -72,8 +73,25 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   // Build items list
   const allItems: CommandItem[] = useMemo(() => {
-    const items: CommandItem[] = [
-      // Pages
+    const items: CommandItem[] = [];
+
+    // Cinematic Story Action
+    if (onOpenCinematic) {
+      items.push({
+        id: 'action_cinematic',
+        category: 'CINEMATIC',
+        title: '✦ 3D Cinematic Judge Experience (35s Film)',
+        subtitle: 'Watch the continuous Three.js Trust Core product story',
+        icon: <Film size={15} style={{ color: '#818cf8' }} />,
+        action: () => {
+          onOpenCinematic();
+          onClose();
+        },
+      });
+    }
+
+    // Pages
+    items.push(
       {
         id: 'page_dashboard',
         category: 'PAGES',
@@ -184,7 +202,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           onClose();
         },
       },
-    ];
+    );
 
     // Tools
     for (const tool of tools) {
@@ -239,6 +257,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     demonstrations,
     authorizations,
     onSelectTab,
+    onOpenCinematic,
     onInspectTool,
     onInspectDemonstration,
     onClose,
@@ -314,7 +333,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 fontSize: '0.82rem',
               }}
             >
-              No matching commands or resources found for "{query}".
+              No matching commands or resources found for &quot;{query}&quot;.
             </div>
           ) : (
             filteredItems.map((item, index) => {
