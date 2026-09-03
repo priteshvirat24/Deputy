@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AuditEvent, Demonstration, LearnedTool } from '@deputy/domain';
 import { ActiveRecordingState, RecordingBar } from './components/RecordingBar.js';
 import { ActiveTab, Sidebar } from './components/Sidebar.js';
-import { WebMcpBanner } from './components/WebMcpBanner.js';
+import { TopBar } from './components/TopBar.js';
 import { AuditView } from './pages/AuditView.js';
 import { DashboardView } from './pages/DashboardView.js';
 import { DemonstrationsView } from './pages/DemonstrationsView.js';
@@ -160,10 +160,18 @@ export const App: React.FC = () => {
     <div className="app-container">
       <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} isRecording={!!recording} />
 
-      <main
-        className="main-layout"
-        style={{ display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto' }}
-      >
+      <div className="main-content">
+        <TopBar />
+        {loading && (
+          <div
+            style={{
+              height: 2,
+              background: 'linear-gradient(90deg, transparent, var(--semantic-auth), transparent)',
+              animation: 'skeleton-shimmer 1.5s infinite',
+            }}
+          />
+        )}
+
         <RecordingBar
           recording={recording}
           onStart={handleStartRecording}
@@ -173,46 +181,70 @@ export const App: React.FC = () => {
           onDiscard={handleDiscardRecording}
         />
 
-        <div style={{ padding: '24px 36px', flex: 1 }}>
-          <WebMcpBanner />
-          {loading && (
-            <div style={{ padding: '8px 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Synchronizing WebMCP state...
-            </div>
-          )}
-
+        <main style={{ flex: 1, overflowY: 'auto' }}>
           {activeTab === 'dashboard' && (
             <DashboardView
               toolCount={tools.length}
               demonstrationCount={demonstrations.length}
               auditCount={auditEvents.length}
+              tools={tools}
+              auditEvents={auditEvents}
+              onRefresh={fetchData}
+              onNavigateTab={tab => setActiveTab(tab as ActiveTab)}
             />
           )}
 
           {activeTab === 'operations' && (
-            <OperationsConsoleView recording={recording} onActionObserved={handleActionObserved} />
+            <div className="page-body">
+              <OperationsConsoleView
+                recording={recording}
+                onActionObserved={handleActionObserved}
+              />
+            </div>
           )}
 
           {activeTab === 'synthesis' && (
-            <SynthesisStudioView
-              onToolApproved={async () => {
-                await fetchData();
-                setActiveTab('tools');
-              }}
-            />
+            <div className="page-body">
+              <SynthesisStudioView
+                onToolApproved={async () => {
+                  await fetchData();
+                  setActiveTab('tools');
+                }}
+              />
+            </div>
           )}
 
-          {activeTab === 'tools' && <ToolsView tools={tools} onRefresh={fetchData} />}
+          {activeTab === 'tools' && (
+            <div className="page-body">
+              <ToolsView tools={tools} onRefresh={fetchData} />
+            </div>
+          )}
 
-          {activeTab === 'demonstrations' && <DemonstrationsView demonstrations={demonstrations} />}
+          {activeTab === 'demonstrations' && (
+            <div className="page-body">
+              <DemonstrationsView demonstrations={demonstrations} />
+            </div>
+          )}
 
-          {activeTab === 'audit' && <AuditView events={auditEvents} onRefresh={fetchData} />}
+          {activeTab === 'audit' && (
+            <div className="page-body">
+              <AuditView events={auditEvents} onRefresh={fetchData} />
+            </div>
+          )}
 
-          {activeTab === 'security' && <SecurityView />}
+          {activeTab === 'security' && (
+            <div className="page-body">
+              <SecurityView />
+            </div>
+          )}
 
-          {activeTab === 'settings' && <SettingsView />}
-        </div>
-      </main>
+          {activeTab === 'settings' && (
+            <div className="page-body">
+              <SettingsView />
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Sparkles, CheckCircle2, AlertTriangle, ShieldCheck, Check } from 'lucide-react';
 import { Demonstration, SynthesisCandidateResult } from '@deputy/domain';
+import { Badge } from '../components/ui/Badge.js';
+import { EmptyState } from '../components/ui/EmptyState.js';
+import { Surface } from '../components/ui/Surface.js';
 
 interface SynthesisStudioProps {
   onToolApproved: () => void;
@@ -109,195 +112,220 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
   };
 
   return (
-    <div className="main-content">
-      <div className="header">
+    <div className="page-body">
+      {/* Header */}
+      <div
+        className="page-header"
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
+      >
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Tool Synthesis Studio</h2>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-            Transform human demonstration evidence into typed, authorized WebMCP tools.
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--semantic-auth)',
+                fontWeight: 700,
+              }}
+            >
+              LEARNING PIPELINE
+            </span>
+            <span style={{ color: 'var(--border-strong)' }}>/</span>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              SYNTHESIS ENGINE
+            </span>
           </div>
+          <h1 className="page-title">Tool Synthesis Studio</h1>
+          <p className="page-description">
+            Transform human demonstration traces into typed, authorized WebMCP tools via
+            deterministic alignment and parameter inference.
+          </p>
         </div>
       </div>
 
       {/* Step 1: Demonstration Selection */}
-      <div className="card" style={{ marginBottom: '24px' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '14px',
-          }}
-        >
-          <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 600 }}>
-              1. Select Demonstrations for Alignment
-            </h3>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
-              Minimum 2 demonstrations required. DEPUTY compares traces to detect variable
-              parameters vs stable constants.
-            </p>
-          </div>
+      <Surface
+        level={2}
+        headerTitle="1. Select Demonstrations for Alignment"
+        headerMeta={`MINIMUM 2 REQUIRED · ${selectedDemoIds.length} SELECTED`}
+        headerAction={
           <button
+            type="button"
             className="btn btn-primary"
             disabled={selectedDemoIds.length < 2 || loading}
             onClick={runSynthesis}
             style={{ gap: '8px' }}
           >
-            <Sparkles size={16} />
-            {loading
-              ? 'Synthesizing...'
-              : `Synthesize Tool from ${selectedDemoIds.length} Demonstrations`}
+            <Sparkles size={14} />
+            <span>
+              {loading
+                ? 'Synthesizing...'
+                : `Synthesize Tool from ${selectedDemoIds.length} Traces`}
+            </span>
           </button>
-        </div>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: '12px',
-          }}
-        >
-          {demonstrations.map(demo => {
-            const isSelected = selectedDemoIds.includes(demo.demonstrationId);
-            return (
-              <div
-                key={demo.demonstrationId}
-                onClick={() => toggleSelectDemo(demo.demonstrationId)}
-                style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: `1px solid ${isSelected ? 'var(--primary)' : 'rgba(255, 255, 255, 0.08)'}`,
-                  background: isSelected ? 'rgba(56, 189, 248, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
+        }
+        style={{ marginBottom: '24px' }}
+      >
+        {demonstrations.length === 0 ? (
+          <EmptyState
+            icon={<Sparkles size={20} />}
+            title="No Completed Demonstrations"
+            description="Record at least 2 task demonstrations in the Operations Console to synthesize a WebMCP tool."
+          />
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '12px',
+            }}
+          >
+            {demonstrations.map(demo => {
+              const isSelected = selectedDemoIds.includes(demo.demonstrationId);
+              return (
                 <div
+                  key={demo.demonstrationId}
+                  onClick={() => toggleSelectDemo(demo.demonstrationId)}
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '6px',
+                    padding: '14px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: `1px solid ${isSelected ? 'var(--border-focus)' : 'var(--border-subtle)'}`,
+                    background: isSelected ? 'rgba(99, 102, 241, 0.08)' : 'var(--surface-1)',
+                    cursor: 'pointer',
+                    transition: 'border-color var(--motion-fast), background var(--motion-fast)',
                   }}
                 >
-                  <span
-                    className="mono"
+                  <div
                     style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      color: isSelected ? '#38bdf8' : '#e2e8f0',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '6px',
                     }}
                   >
-                    {demo.demonstrationId}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => {}}
-                    style={{ accentColor: 'var(--primary)' }}
-                  />
+                    <span
+                      className="mono"
+                      style={{
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: isSelected ? '#a5b4fc' : 'var(--text-primary)',
+                      }}
+                    >
+                      {demo.demonstrationId}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {}}
+                      style={{ accentColor: 'var(--border-focus)', cursor: 'pointer' }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '0.8rem',
+                      color: 'var(--text-secondary)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    {demo.taskDescription || 'Enterprise task execution'}
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', fontSize: '0.72rem' }}>
+                    <Badge variant="active">{demo.actions.length} action(s)</Badge>
+                    <span className="mono" style={{ color: 'var(--text-muted)' }}>
+                      {new Date(demo.startedAt).toLocaleTimeString()}
+                    </span>
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '8px' }}>
-                  {demo.taskDescription || 'Demonstration task'}
-                </div>
-                <div style={{ display: 'flex', gap: '6px', fontSize: '0.75rem' }}>
-                  <span className="badge badge-active">{demo.actions.length} action(s)</span>
-                  <span className="badge badge-secondary">
-                    {new Date(demo.startedAt).toLocaleTimeString()}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              );
+            })}
+          </div>
+        )}
+      </Surface>
 
       {error && (
-        <div
-          className="card"
+        <Surface
+          level={2}
           style={{
-            borderColor: '#ef4444',
+            borderColor: 'rgba(239, 68, 68, 0.3)',
             background: 'rgba(239, 68, 68, 0.05)',
             marginBottom: '20px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: 'var(--semantic-danger)',
+              fontSize: '0.84rem',
+            }}
+          >
             <AlertTriangle size={16} />
             <span style={{ fontWeight: 600 }}>Synthesis Failed: {error}</span>
           </div>
-        </div>
+        </Surface>
       )}
 
-      {/* Step 2: Synthesis Results & Diff */}
+      {/* Step 2 & 3: Results & Human Review */}
       {synthesisResult && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Top Report Stats */}
-          <div className="card">
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
-              }}
-            >
-              <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>
-                  2. Synthesis Report & Alignment
-                </h3>
-                <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
-                  Deterministic trace alignment and empirical variance analysis.
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <span
-                  className={`badge badge-risk-${synthesisResult.candidateTool.riskLevel.toLowerCase()}`}
+          {/* Alignment Report Surface */}
+          <Surface
+            level={2}
+            headerTitle="2. Deterministic Alignment & Parameter Inference"
+            headerMeta={`CONFIDENCE: ${Math.round(synthesisResult.report.confidenceScore * 100)}%`}
+            headerAction={
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <Badge
+                  variant={`risk-${synthesisResult.candidateTool.riskLevel.toLowerCase()}` as any}
                 >
                   Risk: {synthesisResult.candidateTool.riskLevel}
-                </span>
-                <span
-                  className={`badge badge-${synthesisResult.candidateTool.reversibility.toLowerCase()}`}
-                >
+                </Badge>
+                <Badge variant={synthesisResult.candidateTool.reversibility.toLowerCase() as any}>
                   {synthesisResult.candidateTool.reversibility}
-                </span>
-                <span
-                  className="badge"
-                  style={{
-                    background: 'rgba(16, 185, 129, 0.15)',
-                    color: '#10b981',
-                    fontWeight: 700,
-                  }}
-                >
-                  Confidence: {synthesisResult.report.confidence} (
-                  {Math.round(synthesisResult.report.confidenceScore * 100)}%)
-                </span>
+                </Badge>
               </div>
-            </div>
-
-            {/* Reasoning Bullet Points */}
+            }
+          >
+            {/* Reasoning Block */}
             <div
               style={{
-                background: 'rgba(0, 0, 0, 0.25)',
+                background: 'var(--surface-1)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-sm)',
                 padding: '12px 16px',
-                borderRadius: '8px',
                 marginBottom: '16px',
               }}
             >
               <div
                 style={{
-                  fontSize: '0.78rem',
+                  fontSize: '0.72rem',
                   textTransform: 'uppercase',
-                  color: '#64748b',
+                  letterSpacing: '0.06em',
+                  color: 'var(--text-muted)',
                   fontWeight: 700,
                   marginBottom: '6px',
                 }}
               >
-                Synthesis Reasoning
+                Deterministic Alignment Reasoning
               </div>
-              <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.82rem', color: '#cbd5e1' }}>
+              <ul
+                style={{
+                  margin: 0,
+                  paddingLeft: '18px',
+                  fontSize: '0.8rem',
+                  color: 'var(--text-secondary)',
+                }}
+              >
                 {synthesisResult.report.reasoning.map((r, idx) => (
-                  <li key={idx} style={{ marginBottom: '4px' }}>
+                  <li key={idx} style={{ marginBottom: '3px' }}>
                     {r}
                   </li>
                 ))}
@@ -306,17 +334,23 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
 
             {/* Inferred Parameters Table */}
             <div style={{ marginBottom: '16px' }}>
-              <h4 style={{ fontSize: '0.9rem', marginBottom: '8px', color: '#f8fafc' }}>
-                Inferred Dynamic Tool Parameters ({synthesisResult.report.inferredParameters.length}
-                )
-              </h4>
+              <div
+                style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginBottom: '8px',
+                }}
+              >
+                Inferred Variational Parameters ({synthesisResult.report.inferredParameters.length})
+              </div>
               <table className="data-table">
                 <thead>
                   <tr>
                     <th>Parameter Name</th>
                     <th>Type</th>
-                    <th>Source Action & Argument</th>
-                    <th>Observed Values</th>
+                    <th>Source Action & Path</th>
+                    <th>Observed Values Across Traces</th>
                     <th>Confidence</th>
                   </tr>
                 </thead>
@@ -324,15 +358,18 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
                   {synthesisResult.report.inferredParameters.map(param => (
                     <tr key={param.parameterName}>
                       <td>
-                        <span className="mono" style={{ color: '#38bdf8', fontWeight: 600 }}>
+                        <span className="mono" style={{ color: '#818cf8', fontWeight: 600 }}>
                           {param.parameterName}
                         </span>
                       </td>
                       <td>
-                        <span className="badge badge-secondary">{param.inferredType}</span>
+                        <Badge variant="draft">{param.inferredType}</Badge>
                       </td>
                       <td>
-                        <span className="mono" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                        <span
+                          className="mono"
+                          style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}
+                        >
                           {param.sourceAction}.{param.sourceArgumentPath}
                         </span>
                       </td>
@@ -350,7 +387,13 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
                         </div>
                       </td>
                       <td>
-                        <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>
+                        <span
+                          style={{
+                            fontSize: '0.78rem',
+                            color: 'var(--semantic-emerald)',
+                            fontWeight: 600,
+                          }}
+                        >
                           {Math.round(param.confidence * 100)}%
                         </span>
                       </td>
@@ -360,38 +403,41 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
               </table>
             </div>
 
-            {/* Stable Constants & Ignored Volatiles */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {/* Stable Constants & Volatiles */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               <div
                 style={{
-                  background: 'rgba(56, 189, 248, 0.05)',
-                  border: '1px solid rgba(56, 189, 248, 0.15)',
+                  background: 'var(--surface-1)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
                   padding: '12px',
-                  borderRadius: '8px',
                 }}
               >
                 <div
                   style={{
-                    fontSize: '0.78rem',
+                    fontSize: '0.72rem',
                     textTransform: 'uppercase',
-                    color: '#38bdf8',
+                    letterSpacing: '0.06em',
+                    color: 'var(--semantic-webmcp)',
                     fontWeight: 700,
                     marginBottom: '6px',
                   }}
                 >
-                  Stable Constant Arguments (Not Parameterized)
+                  Stable Constants (Invariant Across Traces)
                 </div>
                 {Object.entries(synthesisResult.report.stableConstants).length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {Object.entries(synthesisResult.report.stableConstants).map(([k, v]) => (
-                      <div key={k} className="mono" style={{ fontSize: '0.78rem' }}>
-                        <span style={{ color: '#94a3b8' }}>{k} = </span>
-                        <span style={{ color: '#f8fafc', fontWeight: 600 }}>{String(v)}</span>
+                      <div key={k} className="mono" style={{ fontSize: '0.76rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>{k} = </span>
+                        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                          {String(v)}
+                        </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
                     No constants detected
                   </span>
                 )}
@@ -399,126 +445,162 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
 
               <div
                 style={{
-                  background: 'rgba(100, 116, 139, 0.05)',
-                  border: '1px solid rgba(100, 116, 139, 0.15)',
+                  background: 'var(--surface-1)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
                   padding: '12px',
-                  borderRadius: '8px',
                 }}
               >
                 <div
                   style={{
-                    fontSize: '0.78rem',
+                    fontSize: '0.72rem',
                     textTransform: 'uppercase',
-                    color: '#94a3b8',
+                    letterSpacing: '0.06em',
+                    color: 'var(--text-muted)',
                     fontWeight: 700,
                     marginBottom: '6px',
                   }}
                 >
-                  Ignored Volatile Tokens (Filtered Out)
+                  Filtered Volatile Tokens (Ignored)
                 </div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {synthesisResult.report.ignoredVolatileFields.map(f => (
-                    <span
-                      key={f}
-                      className="badge badge-secondary mono"
-                      style={{ fontSize: '0.72rem' }}
-                    >
-                      {f}
+                  {synthesisResult.report.ignoredVolatileFields.length > 0 ? (
+                    synthesisResult.report.ignoredVolatileFields.map(f => (
+                      <span
+                        key={f}
+                        className="badge badge-draft mono"
+                        style={{ fontSize: '0.72rem' }}
+                      >
+                        {f}
+                      </span>
+                    ))
+                  ) : (
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                      None ignored
                     </span>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>
-          </div>
+          </Surface>
 
-          {/* Step 3: Human Review and Approval */}
-          <div
-            className="card"
-            style={{ borderColor: approvalSuccess ? '#10b981' : 'var(--card-border)' }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
-              }}
-            >
-              <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>
-                  3. Human Authority Review & Approval
-                </h3>
-                <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
-                  Review metadata and activate capability in WebMCP. Security binding to
-                  ActionRegistry cannot be bypassed.
-                </div>
-              </div>
-
-              {approvalSuccess && (
+          {/* Step 3: Human Authority Review & Approval */}
+          <Surface
+            level={2}
+            headerTitle="3. Human Authority Review & WebMCP Activation"
+            headerMeta={approvalSuccess ? 'ACTIVATED IN RUNTIME' : 'READY FOR APPROVAL'}
+            headerAction={
+              approvalSuccess && (
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px',
-                    color: '#10b981',
+                    gap: '6px',
+                    color: 'var(--semantic-emerald)',
+                    fontSize: '0.8rem',
                     fontWeight: 600,
                   }}
                 >
-                  <CheckCircle2 size={18} />
-                  Tool Approved & Registered with WebMCP!
+                  <CheckCircle2 size={16} />
+                  <span>Tool Registered in WebMCP!</span>
                 </div>
-              )}
-            </div>
-
+              )
+            }
+          >
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '20px',
+                gap: '16px',
                 marginBottom: '16px',
               }}
             >
-              <div className="form-group">
-                <label className="form-label">Tool Name</label>
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    color: 'var(--text-muted)',
+                    marginBottom: '4px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Tool Name
+                </label>
                 <input
                   type="text"
-                  className="form-input"
                   value={editName}
                   onChange={e => setEditName(e.target.value)}
                   disabled={approvalSuccess}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    background: 'var(--surface-1)',
+                    border: '1px solid var(--border-default)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.84rem',
+                  }}
                 />
               </div>
-              <div className="form-group">
-                <label className="form-label">Description</label>
+
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    color: 'var(--text-muted)',
+                    marginBottom: '4px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Description
+                </label>
                 <input
                   type="text"
-                  className="form-input"
                   value={editDescription}
                   onChange={e => setEditDescription(e.target.value)}
                   disabled={approvalSuccess}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    background: 'var(--surface-1)',
+                    border: '1px solid var(--border-default)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.84rem',
+                  }}
                 />
               </div>
             </div>
 
+            {/* Generated JSON Schema */}
             <div style={{ marginBottom: '16px' }}>
               <div
                 style={{
-                  fontSize: '0.78rem',
+                  fontSize: '0.74rem',
                   textTransform: 'uppercase',
-                  color: '#64748b',
+                  letterSpacing: '0.06em',
+                  color: 'var(--text-muted)',
                   fontWeight: 700,
                   marginBottom: '6px',
                 }}
               >
-                Generated JSON Schema (additionalProperties: false)
+                Strict JSON Schema (additionalProperties: false)
               </div>
               <pre
                 className="mono"
                 style={{
-                  background: 'rgba(0, 0, 0, 0.4)',
+                  background: 'var(--surface-0)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
                   padding: '12px',
-                  borderRadius: '8px',
-                  fontSize: '0.78rem',
+                  fontSize: '0.74rem',
+                  color: '#cbd5e1',
+                  maxHeight: '220px',
+                  overflowY: 'auto',
                 }}
               >
                 {JSON.stringify(synthesisResult.candidateTool.inputSchema, null, 2)}
@@ -528,25 +610,30 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               {!approvalSuccess ? (
                 <button
-                  className="btn btn-primary"
+                  type="button"
+                  className="btn btn-accent"
                   onClick={approveCandidate}
                   disabled={approving || !editName.trim()}
                   style={{ gap: '8px' }}
                 >
-                  <ShieldCheck size={16} />
-                  {approving ? 'Activating in WebMCP...' : 'Approve & Activate in WebMCP'}
+                  <ShieldCheck size={14} />
+                  <span>
+                    {approving ? 'Activating in WebMCP...' : 'Approve & Activate in WebMCP'}
+                  </span>
                 </button>
               ) : (
                 <button
+                  type="button"
                   className="btn btn-secondary"
-                  onClick={() => window.location.reload()}
-                  style={{ gap: '8px' }}
+                  onClick={() => setSynthesisResult(null)}
+                  style={{ gap: '6px' }}
                 >
-                  <Check size={16} /> Synthesize Another Tool
+                  <Check size={14} />
+                  <span>Synthesize Another Tool</span>
                 </button>
               )}
             </div>
-          </div>
+          </Surface>
         </div>
       )}
     </div>
