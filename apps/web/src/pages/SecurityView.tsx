@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
-import { Shield, Lock, Key, Plus, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Lock, Key, Plus, Trash2, Cpu, ShieldCheck } from 'lucide-react';
+import { Badge } from '../components/ui/Badge.js';
+import { Surface } from '../components/ui/Surface.js';
+import { useToast } from '../context/ToastContext.js';
 
 interface EnrolledPasskey {
   id: string;
@@ -12,16 +15,17 @@ interface EnrolledPasskey {
 }
 
 export const SecurityView: React.FC = () => {
+  const { showToast } = useToast();
   const [passkeys, setPasskeys] = useState<EnrolledPasskey[]>([]);
   const [loadingPasskeys, setLoadingPasskeys] = useState(false);
   const [registering, setRegistering] = useState(false);
-  const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Test bench for digest
   const [testArgs, setTestArgs] = useState(
     '{\n  "customerId": "cust_123",\n  "amount": 2500,\n  "reason": "damaged item"\n}',
   );
   const [digest, setDigest] = useState<string>('');
+  const [searchInvariant, setSearchInvariant] = useState('');
 
   useEffect(() => {
     fetchPasskeys();
@@ -44,7 +48,6 @@ export const SecurityView: React.FC = () => {
 
   const enrollPasskey = async () => {
     setRegistering(true);
-    setMsg(null);
 
     try {
       // 1. Fetch registration options from server
@@ -82,13 +85,15 @@ export const SecurityView: React.FC = () => {
         throw new Error(verifyData.error?.message || 'Failed to verify passkey');
       }
 
-      setMsg({
-        type: 'success',
-        text: 'Hardware passkey successfully registered with User Verification!',
-      });
+      showToast(
+        'success',
+        'Passkey Enrolled',
+        'Hardware authenticator credential registered with User Verification.',
+      );
       await fetchPasskeys();
     } catch (err: unknown) {
-      setMsg({ type: 'error', text: err instanceof Error ? err.message : String(err) });
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      showToast('error', 'Enrollment Failed', errorMsg);
     } finally {
       setRegistering(false);
     }
@@ -100,10 +105,11 @@ export const SecurityView: React.FC = () => {
         method: 'POST',
       });
       if (res.ok) {
+        showToast('amber', 'Credential Revoked', `Passkey ${credentialId.slice(0, 16)} revoked.`);
         await fetchPasskeys();
       }
     } catch (err) {
-      console.error(err);
+      showToast('error', 'Revocation Failed', String(err));
     }
   };
 
@@ -130,471 +136,431 @@ export const SecurityView: React.FC = () => {
   const invariants = [
     {
       id: 1,
-      title: 'No DOM Macros',
-      desc: 'Canonical learned capability is always semantic application commands.',
+      title: 'No DOM Macros or Click Coordinates',
+      desc: 'Canonical learned capability is always semantic application commands bound to typed parameters.',
     },
     {
       id: 2,
-      title: 'Trusted ActionRegistry Only',
-      desc: 'Execution bindings route exclusively to registered handlers.',
+      title: 'Trusted ActionRegistry Sole Target',
+      desc: 'Execution bindings route exclusively to registered native application handlers. No dynamic code generation.',
     },
     {
       id: 3,
       title: 'Registration != Authorization',
-      desc: 'Tool discovery never automatically grants execution authority.',
+      desc: 'Tool discovery through WebMCP never automatically grants execution authority.',
     },
     {
       id: 4,
-      title: 'Exact Argument Binding',
-      desc: 'Human authorization is cryptographically bound to canonical SHA-256 digest.',
+      title: 'Exact SHA-256 Argument Binding',
+      desc: 'Human authorization signature is cryptographically bound to canonical JSON parameter digest.',
     },
     {
       id: 5,
-      title: 'Version & Tool Binding',
-      desc: 'Authorization for tool v1 cannot authorize v2 or any other tool.',
+      title: 'Version & Tool Strict Binding',
+      desc: 'Authorization token issued for tool v1 cannot authorize v2 or any other capability.',
     },
     {
       id: 6,
-      title: 'Single-Use Consumption',
-      desc: 'Authorization is consumed upon execution and cannot be replayed.',
+      title: 'Single-Use Nonce & Consumption',
+      desc: 'Authorization is atomically consumed upon execution and cannot be replayed.',
     },
     {
       id: 7,
-      title: 'Hardware WebAuthn UV',
-      desc: 'User Verification is required for high-risk and irreversible capabilities.',
+      title: 'Hardware WebAuthn User Verification',
+      desc: 'User Verification (UV) is strictly enforced for high-risk and irreversible capabilities.',
     },
     {
       id: 8,
-      title: 'Fail-Closed Defaults',
-      desc: 'Unknown operations, expired challenges, or altered digests are rejected.',
+      title: 'Fail-Closed Defaults Everywhere',
+      desc: 'Unknown operations, expired challenges, or altered parameter digests fail closed immediately.',
     },
     {
       id: 9,
       title: 'Inactive Tools Cannot Execute',
-      desc: 'Only ACTIVE tools may execute; retired tools fail closed.',
+      desc: 'Only ACTIVE tools may execute; retired and disabled tools reject invocations deterministically.',
     },
     {
       id: 10,
-      title: 'Immutable Audit Trail',
-      desc: 'Audit events are append-only and survive tool deletion.',
+      title: 'Append-Only Cryptographic Audit Trail',
+      desc: 'Audit events are immutable, SHA-256 hash chained, and permanently preserved.',
     },
     {
       id: 11,
-      title: 'No Arbitrary Code Execution',
-      desc: 'No eval, new Function, shell execution, or generated scripts.',
+      title: 'No Arbitrary Code Execution (No Eval)',
+      desc: 'Zero eval, new Function, shell execution, or generated executable scripts.',
     },
     {
       id: 12,
-      title: 'Deny-by-Default Origin Policy',
-      desc: 'Strict URL.origin semantics prevent cross-origin prefix attacks.',
+      title: 'Deny-by-Default WHATWG Origin Policy',
+      desc: 'Strict WHATWG URL.origin semantics prevent cross-origin prefix attacks.',
     },
     {
       id: 13,
-      title: 'QUARANTINE Content Boundary',
-      desc: 'Untrusted external content carries immutable provenance.',
+      title: 'QUARANTINE Boundary: Data != Instructions',
+      desc: 'Untrusted external content carries immutable provenance and can never grant authority.',
     },
     {
       id: 14,
       title: 'Retirement WebMCP Propagation',
-      desc: 'Tool retirement immediately aborts in-flight signals and emits toolchange.',
+      desc: 'Tool retirement immediately aborts in-flight signals and removes descriptor from runtime.',
     },
     {
       id: 15,
       title: 'Atomic Concurrency Guard',
-      desc: 'Concurrent authorization consumers result in exactly one execution.',
+      desc: 'Concurrent authorization consumption attempts result in exactly one execution.',
     },
     {
       id: 16,
       title: 'WebMCP Fallback Grace',
-      desc: 'Absence of host WebMCP does not crash the application.',
+      desc: 'Absence of host WebMCP operates in secure backward-compatible adapter mode.',
     },
     {
       id: 17,
-      title: 'ActionRegistry Sole Target',
-      desc: 'No second or parallel execution architecture exists.',
+      title: 'Reversibility & Compensation Contract',
+      desc: 'Capabilities declare reversibility semantics (REVERSIBLE, COMPENSATABLE, IRREVERSIBLE).',
     },
     {
       id: 18,
-      title: 'Deterministic Boundary',
-      desc: 'No security decision depends solely on an LLM classifier.',
+      title: 'Deterministic Policy Decision Boundary',
+      desc: 'No security decision depends solely on an advisory LLM classifier.',
     },
   ];
 
+  const filteredInvariants = invariants.filter(inv => {
+    if (!searchInvariant.trim()) return true;
+    const q = searchInvariant.toLowerCase();
+    return (
+      inv.title.toLowerCase().includes(q) ||
+      inv.desc.toLowerCase().includes(q) ||
+      String(inv.id).includes(q)
+    );
+  });
+
   return (
-    <div className="main-content">
-      <div className="header">
-        <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>
-            Security Posture & Cryptographic Core
-          </h2>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-            Production security boundaries: WebMCP, WebAuthn passkeys, QUARANTINE, and 18
-            Invariants.
-          </div>
+    <div className="page-body">
+      {/* Header */}
+      <div className="page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span
+            style={{
+              fontSize: '0.72rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--semantic-auth)',
+              fontWeight: 700,
+            }}
+          >
+            CRYPTOGRAPHIC GOVERNANCE
+          </span>
+          <span style={{ color: 'var(--border-strong)' }}>/</span>
+          <span
+            style={{
+              fontSize: '0.72rem',
+              color: 'var(--text-muted)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            SECURITY INVARIANTS & HARDWARE ENCLAVE
+          </span>
         </div>
+        <h1 className="page-title">Security Posture & Enforcement Core</h1>
+        <p className="page-description">
+          Hardware WebAuthn FIDO2 User Verification, Canonical SHA-256 parameter bindings,
+          Quarantine data isolation, and 18 core security invariants.
+        </p>
       </div>
 
-      {/* Security Posture Dashboard */}
+      {/* Security Posture Technical Status Grid */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '16px',
-          marginBottom: '24px',
+          gap: 14,
+          marginBottom: 24,
         }}
       >
-        <div className="card">
+        <div className="stat-card">
+          <div className="stat-header">
+            <span className="stat-label">WebMCP Provider</span>
+            <Cpu size={15} style={{ color: 'var(--semantic-webmcp)' }} />
+          </div>
           <div
-            style={{
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              color: '#64748b',
-              fontWeight: 700,
-              marginBottom: '4px',
-            }}
+            className="stat-value"
+            style={{ color: 'var(--semantic-webmcp)', fontSize: '1.4rem' }}
           >
-            WebMCP
+            ACTIVE
           </div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#38bdf8' }}>CONNECTED</div>
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-            Dynamic Tool Surface
-          </div>
+          <div className="stat-hint">Model Context Protocol</div>
         </div>
 
-        <div className="card">
-          <div
-            style={{
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              color: '#64748b',
-              fontWeight: 700,
-              marginBottom: '4px',
-            }}
-          >
-            WebAuthn
+        <div className="stat-card">
+          <div className="stat-header">
+            <span className="stat-label">WebAuthn FIDO2</span>
+            <Key
+              size={15}
+              style={{
+                color: passkeys.length > 0 ? 'var(--semantic-emerald)' : 'var(--semantic-amber)',
+              }}
+            />
           </div>
           <div
+            className="stat-value mono"
             style={{
-              fontSize: '1.1rem',
-              fontWeight: 700,
-              color: passkeys.length > 0 ? '#10b981' : '#f59e0b',
+              fontSize: '1.4rem',
+              color: passkeys.length > 0 ? 'var(--semantic-emerald)' : 'var(--semantic-amber)',
             }}
           >
-            {passkeys.length > 0 ? `${passkeys.length} PASSKEY(S)` : 'NOT ENROLLED'}
+            {passkeys.length > 0 ? `${passkeys.length} ENROLLED` : 'PENDING ENROLL'}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-            FIDO2 / WebAuthn UV
-          </div>
+          <div className="stat-hint">User Verification (UV)</div>
         </div>
 
-        <div className="card">
+        <div className="stat-card">
+          <div className="stat-header">
+            <span className="stat-label">Quarantine Boundary</span>
+            <ShieldCheck size={15} style={{ color: 'var(--semantic-emerald)' }} />
+          </div>
           <div
-            style={{
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              color: '#64748b',
-              fontWeight: 700,
-              marginBottom: '4px',
-            }}
+            className="stat-value"
+            style={{ color: 'var(--semantic-emerald)', fontSize: '1.4rem' }}
           >
-            User Verification
+            ENFORCED
           </div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#10b981' }}>REQUIRED</div>
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-            High-Risk Actions
-          </div>
+          <div className="stat-hint">Data != Instructions</div>
         </div>
 
-        <div className="card">
+        <div className="stat-card">
+          <div className="stat-header">
+            <span className="stat-label">Origin Policy</span>
+            <Lock size={15} style={{ color: 'var(--semantic-emerald)' }} />
+          </div>
           <div
-            style={{
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              color: '#64748b',
-              fontWeight: 700,
-              marginBottom: '4px',
-            }}
+            className="stat-value"
+            style={{ color: 'var(--semantic-emerald)', fontSize: '1.4rem' }}
           >
-            QUARANTINE
+            WHATWG
           </div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#10b981' }}>ACTIVE</div>
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-            Provenance & Budgets
-          </div>
-        </div>
-
-        <div className="card">
-          <div
-            style={{
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              color: '#64748b',
-              fontWeight: 700,
-              marginBottom: '4px',
-            }}
-          >
-            Origin Policy
-          </div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#10b981' }}>
-            DENY-BY-DEFAULT
-          </div>
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-            URL.origin Matching
-          </div>
+          <div className="stat-hint">Exact origin match</div>
         </div>
       </div>
 
-      {/* Passkey Management Section */}
-      <div className="card" style={{ marginBottom: '24px' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '16px',
-          }}
+      {/* 2-Column: Passkey Credentials (Left) & Canonical Digest Bench (Right) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20, marginBottom: 24 }}>
+        {/* Hardware Passkeys Management */}
+        <Surface
+          level={2}
+          headerTitle="Hardware Passkey Enclave (FIDO2 / WebAuthn)"
+          headerMeta={`${passkeys.length} REGISTERED`}
+          headerAction={
+            <button
+              type="button"
+              className="btn btn-accent btn-sm"
+              onClick={enrollPasskey}
+              disabled={registering}
+              style={{ gap: 5 }}
+            >
+              <Plus size={13} />
+              <span>{registering ? 'Enrolling...' : 'Enroll Hardware Passkey'}</span>
+            </button>
+          }
         >
-          <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>WebAuthn Hardware Passkeys</h3>
-            <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
-              Enrolled authenticators used to cryptographically authorize high-risk and irreversible
-              actions.
-            </div>
-          </div>
-          <button
-            className="btn btn-primary"
-            onClick={enrollPasskey}
-            disabled={registering}
-            style={{ gap: '8px' }}
-          >
-            <Plus size={16} />
-            {registering ? 'Enrolling Passkey...' : 'Enroll Hardware Passkey'}
-          </button>
-        </div>
-
-        {msg && (
-          <div
-            style={{
-              padding: '10px 14px',
-              borderRadius: '6px',
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '0.82rem',
-              background:
-                msg.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-              color: msg.type === 'success' ? '#10b981' : '#ef4444',
-              border: `1px solid ${msg.type === 'success' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-            }}
-          >
-            {msg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-            {msg.text}
-          </div>
-        )}
-
-        {loadingPasskeys ? (
-          <div style={{ color: '#94a3b8', fontSize: '0.82rem' }}>Loading credentials...</div>
-        ) : passkeys.length === 0 ? (
-          <div
-            style={{
-              padding: '24px',
-              textAlign: 'center',
-              color: '#94a3b8',
-              background: 'rgba(0, 0, 0, 0.2)',
-              borderRadius: '8px',
-            }}
-          >
-            <Key size={32} style={{ margin: '0 auto 8px auto', opacity: 0.4 }} />
-            <p style={{ margin: 0, fontSize: '0.85rem' }}>No hardware passkeys enrolled yet.</p>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
-              Enroll a Touch ID, Face ID, or security key to enable WebAuthn authorization.
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              WebAuthn hardware authenticator keys require biometric or physical User Verification
+              (UV) to sign single-use capability authorizations.
             </p>
-          </div>
-        ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Credential ID</th>
-                <th>Sign Counter</th>
-                <th>Enrolled At</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {passkeys.map(c => (
-                <tr key={c.id}>
-                  <td>
-                    <span className="mono" style={{ color: '#38bdf8', fontSize: '0.8rem' }}>
-                      {c.credentialId.slice(0, 24)}...
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge badge-secondary mono">{c.counter}</span>
-                  </td>
-                  <td style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                    {new Date(c.createdAt).toLocaleDateString()}{' '}
-                    {new Date(c.createdAt).toLocaleTimeString()}
-                  </td>
-                  <td>
-                    {c.revokedAt ? (
-                      <span className="badge badge-risk-critical">REVOKED</span>
-                    ) : (
-                      <span className="badge badge-active">ACTIVE</span>
-                    )}
-                  </td>
-                  <td>
-                    {!c.revokedAt && (
-                      <button
-                        className="btn btn-secondary"
-                        onClick={() => revokePasskey(c.credentialId)}
+
+            {loadingPasskeys ? (
+              <div style={{ padding: 16, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Loading enrolled credentials...
+              </div>
+            ) : passkeys.length === 0 ? (
+              <div
+                style={{
+                  background: 'var(--surface-1)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: 16,
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    fontSize: '0.84rem',
+                    color: 'var(--text-primary)',
+                    marginBottom: 4,
+                  }}
+                >
+                  No Passkeys Enrolled
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 12 }}>
+                  Click &quot;Enroll Hardware Passkey&quot; to register your security key or
+                  biometric authenticator with the backend.
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {passkeys.map(pk => (
+                  <div
+                    key={pk.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: 'var(--surface-1)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '10px 14px',
+                    }}
+                  >
+                    <div>
+                      <div
+                        className="mono"
                         style={{
-                          padding: '4px 8px',
-                          fontSize: '0.75rem',
-                          color: '#ef4444',
-                          gap: '4px',
+                          fontWeight: 600,
+                          fontSize: '0.82rem',
+                          color: 'var(--text-primary)',
                         }}
                       >
-                        <Trash2 size={12} /> Revoke
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+                        Credential: {pk.credentialId.slice(0, 24)}...
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        Counter: {pk.counter} · Created:{' '}
+                        {new Date(pk.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => revokePasskey(pk.credentialId)}
+                      style={{ color: 'var(--semantic-danger)', gap: 4 }}
+                      title="Revoke passkey"
+                    >
+                      <Trash2 size={12} />
+                      <span>Revoke</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </Surface>
+
+        {/* SHA-256 Canonical Digest Calculator */}
+        <Surface
+          level={2}
+          headerTitle="Canonical SHA-256 Digest Test Bench"
+          headerMeta="INVARIANT 4 PROOF"
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+              Calculates deterministic canonical NFC SHA-256 hash. Key order and whitespace
+              variations produce identical hashes.
+            </p>
+
+            <textarea
+              className="form-textarea mono"
+              rows={4}
+              value={testArgs}
+              onChange={e => setTestArgs(e.target.value)}
+              style={{ fontSize: '0.76rem' }}
+            />
+
+            <button type="button" className="btn btn-secondary btn-sm" onClick={computeDigestLocal}>
+              Calculate Canonical Digest
+            </button>
+
+            {digest && (
+              <div
+                style={{
+                  background: 'var(--surface-0)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-xs)',
+                  padding: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '0.68rem',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-muted)',
+                    fontWeight: 700,
+                  }}
+                >
+                  Canonical SHA-256 Hex
+                </div>
+                <div
+                  className="mono"
+                  style={{
+                    fontSize: '0.74rem',
+                    color: 'var(--semantic-emerald)',
+                    wordBreak: 'break-all',
+                  }}
+                >
+                  {digest}
+                </div>
+              </div>
+            )}
+          </div>
+        </Surface>
       </div>
 
-      {/* 18 Security Invariants */}
-      <div className="card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <Shield size={20} color="#10b981" />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>18 Security Invariants</h3>
-        </div>
-
+      {/* 18 Core Security Invariants Catalog */}
+      <Surface
+        level={2}
+        headerTitle="Core Security Invariants & Formal Bounds"
+        headerMeta={`${filteredInvariants.length} INVARIANTS`}
+        headerAction={
+          <input
+            type="text"
+            className="form-input"
+            style={{ width: 220, fontSize: '0.76rem', padding: '3px 8px' }}
+            placeholder="Search invariants..."
+            value={searchInvariant}
+            onChange={e => setSearchInvariant(e.target.value)}
+          />
+        }
+      >
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '12px',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: 12,
           }}
         >
-          {invariants.map(inv => (
+          {filteredInvariants.map(inv => (
             <div
               key={inv.id}
               style={{
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
-                borderRadius: '8px',
+                background: 'var(--surface-1)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-sm)',
                 padding: '12px 14px',
                 display: 'flex',
-                alignItems: 'flex-start',
-                gap: '10px',
+                flexDirection: 'column',
+                gap: 4,
               }}
             >
               <div
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  color: '#10b981',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  flexShrink: 0,
-                }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
               >
-                {inv.id}
+                <span
+                  className="mono"
+                  style={{ color: 'var(--semantic-auth)', fontWeight: 700, fontSize: '0.76rem' }}
+                >
+                  INVARIANT #{inv.id}
+                </span>
+                <Badge variant="active">ENFORCED</Badge>
               </div>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#f8fafc' }}>
-                  {inv.title}
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
-                  {inv.desc}
-                </div>
+              <div style={{ fontWeight: 600, fontSize: '0.84rem', color: 'var(--text-primary)' }}>
+                {inv.title}
               </div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>{inv.desc}</div>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Argument Digest Test Bench */}
-      <div className="card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <Lock size={18} color="#38bdf8" />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>
-            Invariant 4 & 5: Argument Digest Test Bench
-          </h3>
-        </div>
-        <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '12px' }}>
-          Modify any parameter below to observe how the SHA-256 argument digest instantly shifts,
-          cryptographically breaking any forged or replayed human authorization.
-        </p>
-
-        <textarea
-          style={{
-            width: '100%',
-            height: '90px',
-            background: '#090d16',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '6px',
-            color: '#38bdf8',
-            fontFamily: 'monospace',
-            fontSize: '0.82rem',
-            padding: '10px',
-            marginBottom: '12px',
-          }}
-          value={testArgs}
-          onChange={e => setTestArgs(e.target.value)}
-        />
-
-        <button
-          className="btn btn-primary"
-          onClick={computeDigestLocal}
-          style={{ marginBottom: '12px' }}
-        >
-          Calculate SHA-256 Digest
-        </button>
-
-        {digest && (
-          <div
-            style={{
-              background: '#090d16',
-              padding: '10px 14px',
-              borderRadius: '6px',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '0.72rem',
-                textTransform: 'uppercase',
-                color: '#64748b',
-                fontWeight: 700,
-              }}
-            >
-              Computed Canonical SHA-256 Digest
-            </div>
-            <div
-              className="mono"
-              style={{
-                color: '#10b981',
-                fontSize: '0.85rem',
-                wordBreak: 'break-all',
-                marginTop: '4px',
-              }}
-            >
-              {digest}
-            </div>
-          </div>
-        )}
-      </div>
+      </Surface>
     </div>
   );
 };

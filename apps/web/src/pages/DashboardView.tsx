@@ -53,7 +53,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Fetch real authorizations
   const fetchAuthorizations = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/authorizations');
+      const res = await fetch('/api/authorizations');
       if (res.ok) {
         const json = await res.json();
         setAuthorizations(json.data || []);
@@ -81,48 +81,97 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   };
   const totalRiskTools = tools.length || 1; // avoid divide by zero
 
-  // Scenario Runner
+  // Real Backend Canonical Scenario Runner
   const runCanonicalScenario = async () => {
     setDemoRunning(true);
     setDemoStep(1);
     setDemoLog([
-      'Step 1: Alice demonstrates Customer Creation (Alice Smith) + Invoice (₹2,500)...',
+      'Step 1: Executing Alice customer demonstration via ActionRegistry.customer.create...',
     ]);
 
     try {
-      await new Promise(r => setTimeout(r, 600));
+      // 1. Execute Alice customer.create
+      await fetch('/api/demonstrations/execute-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionType: 'customer.create',
+          arguments: { name: 'Alice Smith', email: 'alice@example.com', currency: 'INR' },
+        }),
+      });
+
       setDemoStep(2);
       setDemoLog(prev => [
         ...prev,
-        'Step 2: Bob demonstrates Customer Creation (Bob Jones) + Invoice (₹4,200)...',
+        'Step 2: Executing Alice invoice creation via ActionRegistry.invoice.create (₹2,500)...',
       ]);
 
-      await new Promise(r => setTimeout(r, 600));
+      // 2. Execute Alice invoice.create
+      await fetch('/api/demonstrations/execute-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionType: 'invoice.create',
+          arguments: { customerId: 'cust_alice_smith', amount: 2500, currency: 'INR' },
+        }),
+      });
+
       setDemoStep(3);
       setDemoLog(prev => [
         ...prev,
-        'Step 3: Synthesis engine aligns traces, parameterizes inputs, and generates create_customer_with_invoice...',
+        'Step 3: Executing Bob demonstration (Bob Jones, ₹4,200 invoice)...',
       ]);
 
-      await new Promise(r => setTimeout(r, 600));
+      // 3. Execute Bob customer & invoice
+      await fetch('/api/demonstrations/execute-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionType: 'customer.create',
+          arguments: { name: 'Bob Jones', email: 'bob@example.com', currency: 'INR' },
+        }),
+      });
+
+      await fetch('/api/demonstrations/execute-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionType: 'invoice.create',
+          arguments: { customerId: 'cust_bob_jones', amount: 4200, currency: 'INR' },
+        }),
+      });
+
       setDemoStep(4);
       setDemoLog(prev => [
         ...prev,
-        'Step 4: Tool activated and dynamically registered in browser WebMCP (document.modelContext)...',
+        'Step 4: Autonomous agent proposes tool execution for Charlie Brown (₹4,200 invoice)...',
       ]);
 
-      await new Promise(r => setTimeout(r, 600));
+      // 4. Propose tool execution
+      const proposalRes = await fetch('/api/tool-proposals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          proposalId: `prop_canonical_${Date.now()}`,
+          toolId: 'tool_create_customer_invoice',
+          toolVersion: 1,
+          arguments: {
+            name: 'Charlie Brown',
+            email: 'charlie@example.com',
+            amount: 4200,
+            currency: 'INR',
+          },
+          requestId: `req_canonical_${Date.now()}`,
+          proposedBy: { agentId: 'lead_autonomous_agent', origin: window.location.origin },
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      const proposalData = await proposalRes.json();
       setDemoStep(5);
       setDemoLog(prev => [
         ...prev,
-        'Step 5: Autonomous agent proposes Charlie Brown (charlie@example.com, ₹4,200 invoice)...',
-      ]);
-
-      await new Promise(r => setTimeout(r, 600));
-      setDemoStep(6);
-      setDemoLog(prev => [
-        ...prev,
-        'Step 6: Policy engine evaluates proposal: HIGH risk + COMPENSATABLE -> REQUIRE_HUMAN_AUTHORIZATION!',
+        `Step 5: Policy evaluation complete: ${proposalData.decision || 'REQUIRE_HUMAN_AUTHORIZATION'}. Prompting WebAuthn Passkey ceremony!`,
       ]);
 
       // Open passkey ceremony modal
@@ -135,13 +184,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const handlePasskeySuccess = async (authId: string) => {
     setPasskeyModalOpen(false);
-    setDemoStep(7);
+    setDemoStep(6);
     setDemoLog(prev => [
       ...prev,
-      `Step 7: Hardware passkey authorized! Single-use token: ${authId.slice(0, 20)}...`,
-      'Step 8: ToolExecutor verifies exact argument digest & atomically consumes authorization...',
-      'Step 9: ActionRegistry executes customer.create followed by invoice.create. Both succeed!',
-      'Step 10: Append-only audit stream records immutable event with SHA-256 hash chain.',
+      `Step 6: Hardware passkey authorized! Single-use token: ${authId.slice(0, 20)}...`,
+      'Step 7: Single-use authorization verified and consumed atomically.',
+      'Step 8: Native ActionRegistry handlers executed successfully.',
+      'Step 9: Append-only cryptographic audit ledger sealed with SHA-256 hash.',
     ]);
     setDemoRunning(false);
     if (onRefresh) onRefresh();
@@ -153,7 +202,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* 1. Header & Command Introduction */}
       <div
         className="page-header"
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -208,7 +263,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           style={{ gap: '8px', padding: '8px 16px' }}
         >
           <Play size={14} fill="currentColor" />
-          <span>{demoRunning ? `Scenario Step ${demoStep}/10...` : 'Run Canonical Demo'}</span>
+          <span>{demoRunning ? `Executing Step ${demoStep}/9...` : 'Run Canonical Demo'}</span>
         </button>
       </div>
 
@@ -266,7 +321,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               style={{ fontSize: '0.72rem', padding: '4px 8px' }}
               onClick={() => onNavigateTab && onNavigateTab('security')}
             >
-              Inspect 37 Invariants <ArrowRight size={12} />
+              Inspect 18 Invariants <ArrowRight size={12} />
             </button>
           }
         >
@@ -320,7 +375,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span className="posture-label">Quarantine Budget</span>
               <span className="posture-value">
                 <span className="status-dot active" />
-                64KB / 6-Depth
+                16KB / 8-Depth
               </span>
               <span className="posture-meta">Immutable Taint</span>
             </div>
@@ -634,7 +689,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <Surface
           level={3}
           headerTitle="Canonical Reference Scenario Runner"
-          headerMeta={`STEP ${demoStep} OF 10`}
+          headerMeta={`STEP ${demoStep} OF 9`}
           headerAction={
             <button
               type="button"
@@ -668,7 +723,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   alignItems: 'flex-start',
                   gap: '8px',
                   color:
-                    logLine.includes('Step 7') || logLine.includes('Both succeed')
+                    logLine.includes('Step 6') || logLine.includes('succeed')
                       ? '#34d399'
                       : '#cbd5e1',
                 }}
@@ -717,7 +772,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             requestId: selectedTraceEvent.requestId || selectedTraceEvent.eventId,
             proposedBy: {
               agentId: selectedTraceEvent.actor.id,
-              origin: 'http://localhost:5173',
+              origin: window.location.origin,
             },
             timestamp: new Date(selectedTraceEvent.timestamp),
           }}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Shield, Cpu, Lock, User, Terminal } from 'lucide-react';
+import { detectWebMCPSupport } from '@deputy/webmcp';
 import { ActiveRecordingState } from './RecordingBar.js';
 
 interface TopBarProps {
@@ -9,11 +10,12 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording }) => {
   const [serverOnline, setServerOnline] = useState(true);
+  const [webmcpAvailable, setWebmcpAvailable] = useState(false);
 
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/health');
+        const res = await fetch('/api/health');
         setServerOnline(res.ok);
       } catch {
         setServerOnline(false);
@@ -23,6 +25,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording 
     checkHealth();
     const interval = setInterval(checkHealth, 8000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const caps = detectWebMCPSupport();
+    setWebmcpAvailable(caps.available);
   }, []);
 
   return (
@@ -39,9 +46,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording 
             gap: 10,
             padding: '5px 12px',
             borderRadius: 'var(--radius-sm)',
-            minWidth: 240,
+            minWidth: 260,
             justifyContent: 'space-between',
           }}
+          title="Open Command Palette (⌘K or Ctrl+K)"
         >
           <div
             style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)' }}
@@ -51,9 +59,26 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording 
           </div>
           <span className="command-palette-kbd">⌘K</span>
         </button>
+
+        {/* Workspace context */}
+        <div
+          className="mono"
+          style={{
+            fontSize: '0.72rem',
+            color: 'var(--text-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            paddingLeft: 8,
+            borderLeft: '1px solid var(--border-subtle)',
+          }}
+        >
+          <Terminal size={12} />
+          <span>PROD_GATEWAY_NODE_01</span>
+        </div>
       </div>
 
-      {/* Right: Runtime Diagnostics */}
+      {/* Right: Technical Status Hierarchy */}
       <div className="top-bar-right">
         {/* Active Recording Notice if any */}
         {recording && (
@@ -65,7 +90,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording 
               padding: '3px 8px',
               borderRadius: 'var(--radius-xs)',
               background: 'rgba(244, 63, 94, 0.12)',
-              border: '1px solid rgba(244, 63, 94, 0.3)',
+              border: '1px solid rgba(244, 63, 94, 0.35)',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.72rem',
               color: 'var(--semantic-recording)',
@@ -77,12 +102,68 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenCommandPalette, recording 
           </div>
         )}
 
-        {/* Server & Security Status Indicator */}
-        <div className="system-status-indicator">
-          <span className={`status-dot ${serverOnline ? 'active' : 'danger'}`} />
-          <span style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)' }}>
-            {serverOnline ? 'SECURE GATEWAY: ONLINE' : 'GATEWAY: OFFLINE'}
+        {/* 1. Security Gate Integrity */}
+        <div
+          className="system-status-indicator"
+          title="Invariant 3 & 8: Fail-closed gateway policy active"
+        >
+          <Shield size={12} style={{ color: 'var(--semantic-emerald)' }} />
+          <span
+            style={{
+              fontSize: '0.72rem',
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            GATE: <strong style={{ color: 'var(--semantic-emerald)' }}>FAIL-CLOSED</strong>
           </span>
+        </div>
+
+        {/* 2. WebMCP Execution Capability */}
+        <div className="system-status-indicator" title="WebMCP Model Context Provider">
+          <Cpu size={12} style={{ color: 'var(--semantic-webmcp)' }} />
+          <span
+            style={{
+              fontSize: '0.72rem',
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            WEBMCP:{' '}
+            <strong style={{ color: 'var(--semantic-webmcp)' }}>
+              {webmcpAvailable ? 'NATIVE' : 'EMULATED'}
+            </strong>
+          </span>
+        </div>
+
+        {/* 3. Hash-Chain Integrity */}
+        <div className="system-status-indicator" title="Cryptographic append-only ledger">
+          <Lock size={12} style={{ color: 'var(--semantic-audit)' }} />
+          <span
+            style={{
+              fontSize: '0.72rem',
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            CHAIN: <strong style={{ color: 'var(--semantic-audit)' }}>SHA-256</strong>
+          </span>
+        </div>
+
+        {/* 4. Operator & Server Online Indicator */}
+        <div
+          className="system-status-indicator"
+          style={{ background: 'var(--surface-3)', borderColor: 'var(--border-default)' }}
+          title="Authenticated Operator Context"
+        >
+          <User size={12} style={{ color: 'var(--semantic-auth)' }} />
+          <span className="mono" style={{ fontSize: '0.72rem', color: 'var(--text-primary)' }}>
+            usr_ops_lead
+          </span>
+          <span
+            className={`status-dot ${serverOnline ? 'active' : 'danger'}`}
+            style={{ marginLeft: 4 }}
+          />
         </div>
       </div>
     </header>

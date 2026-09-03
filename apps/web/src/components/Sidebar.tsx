@@ -59,9 +59,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Nav Groups */}
       <ul className="nav-groups">
-        {/* Monitoring & Operations */}
+        {/* COMMAND */}
         <li>
-          <div className="nav-group-label">OPERATIONS</div>
+          <div className="nav-group-label">COMMAND</div>
           <ul className="nav-items">
             <li
               className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
@@ -80,9 +80,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </ul>
         </li>
 
-        {/* Learning Pipeline */}
+        {/* LEARN */}
         <li>
-          <div className="nav-group-label">LEARNING PIPELINE</div>
+          <div className="nav-group-label">LEARN</div>
           <ul className="nav-items">
             <li
               className={`nav-item ${activeTab === 'demonstrations' ? 'active' : ''}`}
@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </ul>
         </li>
 
-        {/* Capabilities & Runtime */}
+        {/* CAPABILITIES */}
         <li>
           <div className="nav-group-label">CAPABILITIES</div>
           <ul className="nav-items">
@@ -143,9 +143,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </ul>
         </li>
 
-        {/* Governance & Security Enclave */}
+        {/* SECURITY */}
         <li>
-          <div className="nav-group-label">SECURITY & AUDIT</div>
+          <div className="nav-group-label">SECURITY</div>
           <ul className="nav-items">
             <li
               className={`nav-item ${activeTab === 'authorizations' ? 'active' : ''}`}
@@ -193,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </ul>
         </li>
 
-        {/* System Settings */}
+        {/* SYSTEM */}
         <li>
           <div className="nav-group-label">SYSTEM</div>
           <ul className="nav-items">
