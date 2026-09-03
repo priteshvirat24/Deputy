@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Settings,
   Lock,
+  Bot,
 } from 'lucide-react';
 
 export type ActiveTab =
@@ -17,6 +18,7 @@ export type ActiveTab =
   | 'demonstrations'
   | 'synthesis'
   | 'tools'
+  | 'agent'
   | 'audit'
   | 'security'
   | 'settings';
@@ -89,6 +91,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isReco
         >
           <Wrench size={18} />
           <span>Learned Tools</span>
+        </li>
+        <li
+          className={`nav-item ${activeTab === 'agent' ? 'active' : ''}`}
+          onClick={() => onSelectTab('agent')}
+        >
+          <Bot size={18} />
+          <span>Agent&rsquo;s-Eye View</span>
         </li>
         <li
           className={`nav-item ${activeTab === 'audit' ? 'active' : ''}`}

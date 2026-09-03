@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LearnedTool } from '@deputy/domain';
 import { Play, Eye, ShieldCheck, Key } from 'lucide-react';
 import { PasskeyAuthModal } from '../components/PasskeyAuthModal.js';
+import { recordProposal, recordResponse } from '../lib/agentEye.js';
 
 interface ToolsViewProps {
   tools: LearnedTool[];
@@ -39,21 +40,25 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ tools, onRefresh }) => {
         headers['x-deputy-authorization-id'] = authorizationId;
       }
 
+      const proposal = {
+        proposalId: `prop_ui_${Date.now()}`,
+        toolId: tool.toolId,
+        toolVersion: tool.version,
+        arguments: defaultArgs,
+        requestId,
+        proposedBy: { agentId: 'lead_autonomous_agent', origin: window.location.origin },
+        timestamp: new Date().toISOString(),
+      };
+      recordProposal(proposal);
+
       const res = await fetch('/api/tool-proposals', {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          proposalId: `prop_ui_${Date.now()}`,
-          toolId: tool.toolId,
-          toolVersion: tool.version,
-          arguments: defaultArgs,
-          requestId,
-          proposedBy: { agentId: 'lead_autonomous_agent', origin: window.location.origin },
-          timestamp: new Date().toISOString(),
-        }),
+        body: JSON.stringify(proposal),
       });
 
       const data = await res.json();
+      recordResponse(data);
       setTestResult(JSON.stringify(data, null, 2));
 
       // If policy demands human authorization, prompt passkey ceremony

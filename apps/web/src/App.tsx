@@ -11,6 +11,7 @@ import { SecurityView } from './pages/SecurityView.js';
 import { SettingsView } from './pages/SettingsView.js';
 import { SynthesisStudioView } from './pages/SynthesisStudioView.js';
 import { ToolsView } from './pages/ToolsView.js';
+import { AgentEyeView } from './pages/AgentEyeView.js';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
@@ -203,6 +204,8 @@ export const App: React.FC = () => {
           )}
 
           {activeTab === 'tools' && <ToolsView tools={tools} onRefresh={fetchData} />}
+
+          {activeTab === 'agent' && <AgentEyeView tools={tools} />}
 
           {activeTab === 'demonstrations' && <DemonstrationsView demonstrations={demonstrations} />}
 
