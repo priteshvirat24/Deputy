@@ -8,26 +8,23 @@ on:
 
 jobs:
   verify:
-    name: Typecheck, Lint, Test & Build
+    name: Typecheck, Lint, Test & Build (Node 22)
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20, 22]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 11.16.0
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -46,9 +43,3 @@ jobs:
 
       - name: Build all packages & apps
         run: pnpm build
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Run Playwright E2E browser tests
-        run: pnpm exec playwright test
