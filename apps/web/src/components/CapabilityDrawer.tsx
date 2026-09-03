@@ -33,7 +33,7 @@ export const CapabilityDrawer: React.FC<CapabilityDrawerProps> = ({
   const handleStatusTransition = async (newStatus: ToolLifecycleState, reason: string) => {
     setTransitioning(true);
     try {
-      const res = await fetch(`http://localhost:4000/api/tools/${tool.toolId}/status`, {
+      const res = await fetch(`/api/tools/${tool.toolId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, reason }),
