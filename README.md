@@ -41,7 +41,7 @@ Deputy/
 │   ├── database/               # PostgreSQL schema (Drizzle ORM), migrations, repositories, and atomic concurrency guards
 │   └── config/                 # Strict environment validation contract and security constants
 │
-├── tests/                      # Comprehensive test suites (151 tests, 100% passing across 17 test files)
+├── tests/                      # Comprehensive test suites (168 tests, 100% passing across 18 test files)
 │   ├── canonical-attacks-a-h.test.ts       # Authoritative Attacks Matrix (Attacks A through H)
 │   ├── deputy-security-invariants.test.ts  # Full 37 Security Invariants Verification
 │   ├── composite-transaction.test.ts       # Transaction safety, declarative dataflow & compensation
@@ -108,13 +108,13 @@ Deputy/
 # 1. Typecheck across all 10 packages & apps (0 errors)
 pnpm typecheck
 
-# 2. Lint check (0 errors, 0 warnings)
+# 2. Lint check (0 errors)
 pnpm lint
 
 # 3. Format check
 pnpm format:check
 
-# 4. Run all 151 Vitest unit & integration tests
+# 4. Run all 168 Vitest unit & integration tests
 pnpm test
 
 # 5. Build production bundles for all packages and apps
@@ -141,3 +141,10 @@ pnpm dev
 # Or run with Docker Compose (PostgreSQL + Server)
 docker compose up -d
 ```
+
+---
+
+## License
+
+DEPUTY is released under the [MIT License](./LICENSE). Every package in the
+monorepo declares `"license": "MIT"`.
