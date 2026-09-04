@@ -14,7 +14,7 @@
 ### **WebMCP-Native Learning & Hardware-Verified Authorization Platform for Autonomous AI Agents**
 
 [![CI Gate](https://github.com/priteshvirat24/Deputy/actions/workflows/ci.yml/badge.svg)](https://github.com/priteshvirat24/Deputy/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-151%20passing-10b981.svg?style=flat-square)](https://github.com/priteshvirat24/Deputy)
+[![Tests](https://img.shields.io/badge/tests-175%20passing-10b981.svg?style=flat-square)](https://github.com/priteshvirat24/Deputy)
 [![TypeScript](<https://img.shields.io/badge/TypeScript-5.8%20(Strict)-3178c6.svg?style=flat-square>)](https://www.typescriptlang.org/)
 [![WebMCP](https://img.shields.io/badge/WebMCP-Native%20Browser-f59e0b.svg?style=flat-square)](https://github.com/priteshvirat24/Deputy)
 [![FIDO2 WebAuthn](<https://img.shields.io/badge/FIDO2-WebAuthn%20Level%203%20(UV)-6366f1.svg?style=flat-square>)](https://w3c.github.io/webauthn/)
@@ -433,7 +433,7 @@ Deputy/
 │   ├── database/               # Drizzle ORM PostgreSQL schema, SQL migrations & atomic repo guards
 │   └── config/                 # Strict environment contracts & security constants
 │
-├── tests/                      # 151 Unit, Integration, Adversarial & Invariant Tests (100% Passing)
+├── tests/                      # 175 Unit, Integration, Adversarial & Invariant Tests (100% Passing)
 │   ├── canonical-attacks-a-h.test.ts       # Authoritative Attacks Matrix (Attacks A-H)
 │   ├── deputy-security-invariants.test.ts  # Full 37 Security Invariants Verification
 │   ├── composite-transaction.test.ts       # Transactions, declarative dataflow & compensation
@@ -535,7 +535,7 @@ pnpm lint
 # 3. Format check
 pnpm format:check
 
-# 4. Run all 151 Vitest unit, integration & adversarial tests
+# 4. Run all 175 Vitest unit, integration & adversarial tests
 pnpm test
 
 # 5. Build production bundles for all packages and web app

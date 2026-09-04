@@ -1,37 +1,67 @@
 import React from 'react';
+import { Surface } from '../components/ui/Surface.js';
+import { Badge } from '../components/ui/Badge.js';
 
 export const SettingsView: React.FC = () => {
   return (
     <div className="page-body">
       <div className="page-header">
-        <h2 className="page-title">System Settings & Runtime Configuration</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span
+            style={{
+              fontSize: '0.72rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--text-muted)',
+              fontWeight: 700,
+            }}
+          >
+            SYSTEM CONFIGURATION
+          </span>
+          <span style={{ color: 'var(--border-strong)' }}>/</span>
+          <span
+            style={{
+              fontSize: '0.72rem',
+              color: 'var(--text-muted)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            RUNTIME PARAMETERS
+          </span>
+        </div>
+        <h1 className="page-title">System Settings & Runtime Configuration</h1>
         <p className="page-description">
-          Active operational parameters, security limits, and WebMCP protocol configuration.
+          Active operational parameters, security limits, database engine, and WebMCP protocol
+          configuration.
         </p>
       </div>
 
-      <div className="panel">
-        <div className="panel-header">
-          <h3 className="panel-title">Runtime Environment</h3>
-        </div>
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <Surface
+        level={2}
+        headerTitle="Runtime Environment & Security Boundaries"
+        headerMeta="OPERATING CONFIGURATION"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               borderBottom: '1px solid var(--border-subtle)',
               paddingBottom: '12px',
+              alignItems: 'center',
             }}
           >
             <div>
-              <div style={{ fontWeight: 600 }}>Backend API Gateway</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                Backend API Gateway
+              </div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
                 Hono + Node.js HTTP Server
               </div>
             </div>
-            <div className="mono" style={{ color: 'var(--accent-cyan)' }}>
-              http://127.0.0.1:4000
-            </div>
+            <span className="mono" style={{ color: 'var(--semantic-webmcp)', fontSize: '0.82rem' }}>
+              {`${window.location.origin}/api`}
+            </span>
           </div>
 
           <div
@@ -40,17 +70,23 @@ export const SettingsView: React.FC = () => {
               justifyContent: 'space-between',
               borderBottom: '1px solid var(--border-subtle)',
               paddingBottom: '12px',
+              alignItems: 'center',
             }}
           >
             <div>
-              <div style={{ fontWeight: 600 }}>Primary Database Engine</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                Primary Database Engine
+              </div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
                 PostgreSQL via Drizzle ORM
               </div>
             </div>
-            <div className="mono" style={{ color: '#34d399' }}>
+            <span
+              className="mono"
+              style={{ color: 'var(--semantic-emerald)', fontSize: '0.82rem' }}
+            >
               PostgreSQL 18 Target
-            </div>
+            </span>
           </div>
 
           <div
@@ -59,17 +95,18 @@ export const SettingsView: React.FC = () => {
               justifyContent: 'space-between',
               borderBottom: '1px solid var(--border-subtle)',
               paddingBottom: '12px',
+              alignItems: 'center',
             }}
           >
             <div>
-              <div style={{ fontWeight: 600 }}>WebMCP Protocol Specification</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Targeted browser capability surface
+              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                WebMCP Protocol Specification
+              </div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                Targeted browser model capability surface
               </div>
             </div>
-            <div className="mono" style={{ color: '#f59e0b' }}>
-              draft-2025-01
-            </div>
+            <Badge variant="webmcp">draft-2025-01</Badge>
           </div>
 
           <div
@@ -78,30 +115,41 @@ export const SettingsView: React.FC = () => {
               justifyContent: 'space-between',
               borderBottom: '1px solid var(--border-subtle)',
               paddingBottom: '12px',
+              alignItems: 'center',
             }}
           >
             <div>
-              <div style={{ fontWeight: 600 }}>Authorization TTL Window</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                Authorization TTL Window
+              </div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
                 Maximum validity for issued human authorizations
               </div>
             </div>
-            <div className="mono">300 seconds (5 minutes)</div>
+            <span className="mono" style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+              300 seconds (5 minutes)
+            </span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <div>
-              <div style={{ fontWeight: 600 }}>Execution Policy Default</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Default security stance for unmatched policies
+              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                Execution Policy Default
+              </div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                Default security stance for unmatched capability policies
               </div>
             </div>
-            <div className="mono" style={{ color: '#38bdf8', fontWeight: 700 }}>
-              FAIL-CLOSED (DENY)
-            </div>
+            <Badge variant="risk-critical">FAIL-CLOSED (DENY)</Badge>
           </div>
         </div>
-      </div>
+      </Surface>
     </div>
   );
 };

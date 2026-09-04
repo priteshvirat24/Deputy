@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { getEnv } from '@deputy/config';
+import { LearnedTool } from '@deputy/domain';
 import { structuredErrorHandler } from './middleware/error-handler.js';
 import { idempotencyMiddleware } from './middleware/idempotency.js';
 import { createRateLimiter } from './middleware/rate-limiter.js';
@@ -11,10 +12,12 @@ import { createAuthorizationRoutes } from './routes/authorizations.js';
 import { createDemonstrationRoutes } from './routes/demonstrations.js';
 import { createHealthRoutes } from './routes/health.js';
 import { createProposalRoutes } from './routes/proposals.js';
+import { createQuarantineRoutes } from './routes/quarantine.js';
 import { createSynthesisRoutes } from './routes/synthesis.js';
 import { createToolRoutes } from './routes/tools.js';
 import { createWebAuthnRoutes } from './routes/webauthn.js';
 import { AppServices, initializeServices } from './services/index.js';
+import { mountStaticSpa } from './static.js';
 
 export function createApp(customServices?: AppServices) {
   const env = getEnv();
@@ -67,19 +70,58 @@ export function createApp(customServices?: AppServices) {
   app.route('/api/authorizations', createAuthorizationRoutes(services));
   app.route('/api/auth/webauthn', createWebAuthnRoutes(services));
   app.route('/api/audit', createAuditRoutes(services));
+  app.route('/api/quarantine', createQuarantineRoutes(services));
 
-  // 4. Structured Error Handler
+  // 4. Optional single-origin SPA serving (WebAuthn RP/origin agreement).
+  if (env.SERVE_STATIC) {
+    mountStaticSpa(app, env);
+  }
+
+  // 5. Structured Error Handler
   app.onError(structuredErrorHandler);
 
   return { app, services };
 }
 
 /**
+ * (Re)register the two seeded tools into the in-memory WebMCP adapter. The
+ * adapter is process-local, so this runs on every boot — including restarts
+ * against a durable database where the rows already exist.
+ */
+function registerSeedTools(services: AppServices, tools: (LearnedTool | undefined)[]): void {
+  for (const tool of tools) {
+    if (!tool || services.webmcpAdapter.hasTool(tool.toolId)) continue;
+    if (tool.toolId === 'tool_refund_customer') {
+      services.webmcpAdapter.registerTool(tool, async (params: Record<string, unknown>) => ({
+        status: 'DELEGATED_TO_SECURE_GATEWAY',
+        params,
+      }));
+    } else {
+      services.webmcpAdapter.registerTool(tool, async (params: Record<string, unknown>) => ({
+        status: 'UPDATED',
+        params,
+      }));
+    }
+  }
+}
+
+/**
  * Seed initial sample tools and demonstrations into repository
  * for local development, demo scenarios, and testing.
+ *
+ * Idempotent: with a durable (POSTGRES) repository the rows persist across
+ * restarts, so the DB writes only run against an empty store. The WebMCP
+ * adapter is always (re)registered so tools are present on every boot.
  */
 export async function seedSampleData(services: AppServices): Promise<void> {
   const now = new Date();
+
+  const seededRefund = await services.toolRepo.getById('tool_refund_customer');
+  const seededUpdate = await services.toolRepo.getById('tool_update_customer');
+  if (seededRefund || seededUpdate) {
+    registerSeedTools(services, [seededRefund, seededUpdate]);
+    return;
+  }
 
   // Seed Refund Tool
   await services.toolRepo.create({
@@ -176,20 +218,11 @@ export async function seedSampleData(services: AppServices): Promise<void> {
     originRestrictions: [],
   });
 
-  // Register in WebMCP adapter
-  const refundTool = await services.toolRepo.getById('tool_refund_customer');
-  if (refundTool) {
-    services.webmcpAdapter.registerTool(refundTool, async (params: Record<string, unknown>) => {
-      return { status: 'DELEGATED_TO_SECURE_GATEWAY', params };
-    });
-  }
-
-  const updateTool = await services.toolRepo.getById('tool_update_customer');
-  if (updateTool) {
-    services.webmcpAdapter.registerTool(updateTool, async (params: Record<string, unknown>) => {
-      return { status: 'UPDATED', params };
-    });
-  }
+  // Register the freshly-seeded tools into the WebMCP adapter.
+  registerSeedTools(services, [
+    await services.toolRepo.getById('tool_refund_customer'),
+    await services.toolRepo.getById('tool_update_customer'),
+  ]);
 
   // Seed Demonstration 1: Alice onboarding & invoice creation
   await services.demonstrationRepo.create({

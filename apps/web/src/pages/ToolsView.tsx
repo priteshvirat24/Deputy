@@ -6,6 +6,7 @@ import { EmptyState } from '../components/ui/EmptyState.js';
 import { Surface } from '../components/ui/Surface.js';
 import { CapabilityDrawer } from '../components/CapabilityDrawer.js';
 import { PasskeyAuthModal } from '../components/PasskeyAuthModal.js';
+import { recordProposal, recordResponse } from '../lib/agentEye.js';
 import { useToast } from '../context/ToastContext.js';
 
 interface ToolsViewProps {
@@ -81,21 +82,26 @@ export const ToolsView: React.FC<ToolsViewProps> = ({
         headers['x-deputy-authorization-id'] = authorizationId;
       }
 
-      const res = await fetch('http://localhost:4000/api/tool-proposals', {
+      const proposalPayload = {
+        proposalId: `prop_ui_${Date.now()}`,
+        toolId: tool.toolId,
+        toolVersion: tool.version,
+        arguments: defaultArgs,
+        requestId,
+        proposedBy: { agentId: 'lead_autonomous_agent', origin: window.location.origin },
+        timestamp: new Date().toISOString(),
+      };
+
+      recordProposal(proposalPayload);
+
+      const res = await fetch('/api/tool-proposals', {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          proposalId: `prop_ui_${Date.now()}`,
-          toolId: tool.toolId,
-          toolVersion: tool.version,
-          arguments: defaultArgs,
-          requestId,
-          proposedBy: { agentId: 'lead_autonomous_agent', origin: window.location.origin },
-          timestamp: new Date().toISOString(),
-        }),
+        body: JSON.stringify(proposalPayload),
       });
 
       const data = await res.json();
+      recordResponse(data);
       setTestResult(JSON.stringify(data, null, 2));
 
       if (data.decision === 'REQUIRE_HUMAN_AUTHORIZATION' && !authorizationId) {

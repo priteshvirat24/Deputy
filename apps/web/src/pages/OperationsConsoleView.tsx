@@ -229,7 +229,7 @@ export const OperationsConsoleView: React.FC<OperationsConsoleProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:4000/api/demonstrations/execute-action', {
+      const res = await fetch('/api/demonstrations/execute-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -283,7 +283,7 @@ export const OperationsConsoleView: React.FC<OperationsConsoleProps> = ({
     setAgentProposalResponse(null);
     try {
       const requestId = `req_agent_${Date.now()}`;
-      const res = await fetch('http://localhost:4000/api/tool-proposals', {
+      const res = await fetch('/api/tool-proposals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -337,7 +337,7 @@ export const OperationsConsoleView: React.FC<OperationsConsoleProps> = ({
   const handlePasskeyAuthorized = async (authId: string) => {
     if (!passkeyRequirement) return;
     try {
-      const res = await fetch('http://localhost:4000/api/tool-proposals', {
+      const res = await fetch('/api/tool-proposals', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

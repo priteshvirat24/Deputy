@@ -1,8 +1,12 @@
 import { serve } from '@hono/node-server';
 import { getEnv } from '@deputy/config';
 import { createApp, seedSampleData } from './app.js';
+import { applyPlatformDefaults } from './platform.js';
 
 async function main() {
+  // Fill WebAuthn/origin config from the hosting platform (e.g. Render) before
+  // the env contract is validated.
+  applyPlatformDefaults();
   const env = getEnv();
   const { app, services } = createApp();
 

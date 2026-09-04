@@ -6,21 +6,26 @@ import {
   Sparkles,
   Wrench,
   Cpu,
+  Bot,
   Key,
   ShieldAlert,
   ScrollText,
   ShieldCheck,
   Settings,
   Shield,
+  Film,
+  Globe,
 } from 'lucide-react';
 
 export type ActiveTab =
+  | 'landing'
   | 'dashboard'
   | 'operations'
   | 'demonstrations'
   | 'synthesis'
   | 'tools'
   | 'webmcp'
+  | 'agent'
   | 'authorizations'
   | 'quarantine'
   | 'audit'
@@ -30,6 +35,7 @@ export type ActiveTab =
 interface SidebarProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
+  onOpenCinematic?: () => void;
   pendingAuthCount?: number;
   activeToolCount?: number;
 }
@@ -37,6 +43,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
+  onOpenCinematic,
   pendingAuthCount = 0,
   activeToolCount = 0,
 }) => {
@@ -44,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <aside className="sidebar">
       {/* Brand Header */}
       <div className="sidebar-header">
-        <div className="brand">
+        <div className="brand" onClick={() => onSelectTab('landing')} style={{ cursor: 'pointer' }}>
           <div className="brand-icon">
             <Shield size={18} />
           </div>
@@ -57,9 +64,51 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Nav Groups */}
       <ul className="nav-groups">
-        {/* Monitoring & Operations */}
+        {/* OVERVIEW & STORY */}
         <li>
-          <div className="nav-group-label">OPERATIONS</div>
+          <div className="nav-group-label">OVERVIEW</div>
+          <ul className="nav-items">
+            <li
+              className={`nav-item ${activeTab === 'landing' ? 'active' : ''}`}
+              onClick={() => onSelectTab('landing')}
+            >
+              <Globe size={15} className="nav-icon" style={{ color: '#38bdf8' }} />
+              <span>Landing & 3D Core</span>
+            </li>
+            {onOpenCinematic && (
+              <li
+                className="nav-item"
+                onClick={onOpenCinematic}
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(129, 140, 248, 0.12), rgba(6, 182, 212, 0.12))',
+                  border: '1px solid rgba(129, 140, 248, 0.25)',
+                  color: '#ffffff',
+                }}
+              >
+                <Film size={15} className="nav-icon" style={{ color: '#818cf8' }} />
+                <span style={{ fontWeight: 600 }}>Judge Mode Film</span>
+                <span
+                  className="mono"
+                  style={{
+                    fontSize: '0.65rem',
+                    background: 'rgba(129, 140, 248, 0.25)',
+                    padding: '1px 5px',
+                    borderRadius: 'var(--radius-xs)',
+                    color: '#c7d2fe',
+                    marginLeft: 'auto',
+                  }}
+                >
+                  38s
+                </span>
+              </li>
+            )}
+          </ul>
+        </li>
+
+        {/* COMMAND */}
+        <li>
+          <div className="nav-group-label">COMMAND</div>
           <ul className="nav-items">
             <li
               className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
@@ -78,9 +127,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </ul>
         </li>
 
-        {/* Learning Pipeline */}
+        {/* LEARN */}
         <li>
-          <div className="nav-group-label">LEARNING PIPELINE</div>
+          <div className="nav-group-label">LEARN</div>
           <ul className="nav-items">
             <li
               className={`nav-item ${activeTab === 'demonstrations' ? 'active' : ''}`}
@@ -99,7 +148,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </ul>
         </li>
 
-        {/* Capabilities & Runtime */}
+        {/* CAPABILITIES */}
         <li>
           <div className="nav-group-label">CAPABILITIES</div>
           <ul className="nav-items">
@@ -131,12 +180,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Cpu size={15} className="nav-icon" />
               <span>WebMCP Runtime</span>
             </li>
+            <li
+              className={`nav-item ${activeTab === 'agent' ? 'active' : ''}`}
+              onClick={() => onSelectTab('agent')}
+            >
+              <Bot size={15} className="nav-icon" />
+              <span>Agent&rsquo;s-Eye View</span>
+            </li>
           </ul>
         </li>
 
-        {/* Governance & Security Enclave */}
+        {/* SECURITY */}
         <li>
-          <div className="nav-group-label">SECURITY & AUDIT</div>
+          <div className="nav-group-label">SECURITY</div>
           <ul className="nav-items">
             <li
               className={`nav-item ${activeTab === 'authorizations' ? 'active' : ''}`}
@@ -184,7 +240,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </ul>
         </li>
 
-        {/* System Settings */}
+        {/* SYSTEM */}
         <li>
           <div className="nav-group-label">SYSTEM</div>
           <ul className="nav-items">

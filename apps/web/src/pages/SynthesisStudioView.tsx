@@ -44,7 +44,7 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
 
   const fetchDemonstrations = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/demonstrations?status=COMPLETED');
+      const res = await fetch('/api/demonstrations?status=COMPLETED');
       const json = await res.json();
       if (json.data && Array.isArray(json.data)) {
         setDemonstrations(json.data);
@@ -89,7 +89,7 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
     setApprovalSuccess(false);
 
     try {
-      const res = await fetch('http://localhost:4000/api/synthesis/synthesize', {
+      const res = await fetch('/api/synthesis/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ demonstrationIds: selectedDemoIds }),
@@ -125,7 +125,7 @@ export const SynthesisStudioView: React.FC<SynthesisStudioProps> = ({ onToolAppr
     setError(null);
 
     try {
-      const res = await fetch('http://localhost:4000/api/synthesis/approve', {
+      const res = await fetch('/api/synthesis/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

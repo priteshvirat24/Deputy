@@ -1,0 +1,394 @@
+/* Cinematic Experience Container on White Architectural Canvas */
+.cinematic-experience-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffffff;
+  z-index: 9999;
+  overflow: hidden;
+  font-family: var(--font-body);
+  user-select: none;
+}
+
+/* Subtle Technical Radial Grid on White */
+.cinematic-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background-image: radial-gradient(#e2e8f0 1.2px, transparent 1.2px);
+  background-size: 32px 32px;
+  opacity: 0.6;
+  z-index: 5;
+}
+
+/* Top Control Bar */
+.cinematic-topbar {
+  position: absolute;
+  top: 20px;
+  left: 28px;
+  right: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.cinematic-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cinematic-brand-title {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #09090b;
+}
+
+.cinematic-brand-badge {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  color: #6d28d9;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.cinematic-controls-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Bottom Timeline Bar */
+.cinematic-bottombar {
+  position: absolute;
+  bottom: 24px;
+  left: 32px;
+  right: 32px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.cinematic-scrubber-track {
+  width: 100%;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+  transition: height 120ms ease;
+}
+
+.cinematic-scrubber-track:hover {
+  height: 7px;
+}
+
+.cinematic-scrubber-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #0891b2, #059669);
+  border-radius: 3px;
+  position: relative;
+}
+
+.cinematic-scrubber-head {
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #09090b;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  border: 2px solid #ffffff;
+}
+
+.cinematic-timeline-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cinematic-milestones {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.cinematic-milestone-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 5px 10px;
+  color: #52525b;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 140ms ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.cinematic-milestone-btn:hover {
+  background: #f1f5f9;
+  color: #09090b;
+  border-color: #cbd5e1;
+}
+
+.cinematic-milestone-btn.active {
+  background: #09090b;
+  border-color: #09090b;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.cinematic-controls-bottom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cinematic-btn-icon {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #18181b;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 140ms ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.cinematic-btn-icon:hover {
+  background: #f1f5f9;
+  color: #09090b;
+  border-color: #cbd5e1;
+}
+
+.cinematic-btn-play {
+  background: #09090b;
+  border: 1px solid #09090b;
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 140ms ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.cinematic-btn-play:hover {
+  background: #27272a;
+  transform: scale(1.04);
+}
+
+.cinematic-time-readout {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: #52525b;
+  font-variant-numeric: tabular-nums;
+  background: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Narrative Typography Overlay (High Contrast on White) */
+.cinematic-text-overlay {
+  position: absolute;
+  top: 14%;
+  left: 6%;
+  max-width: 540px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.cinematic-scene-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cinematic-scene-title {
+  font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  color: #09090b;
+  margin-bottom: 12px;
+}
+
+.cinematic-scene-tagline {
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  color: #52525b;
+  margin-bottom: 14px;
+  line-height: 1.35;
+}
+
+.cinematic-scene-supporting {
+  font-size: 0.95rem;
+  color: #71717a;
+  line-height: 1.55;
+  max-width: 460px;
+}
+
+/* Technical Evidence Panels on White */
+.cinematic-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.08);
+}
+
+.cinematic-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #09090b;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cinematic-trace-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 0.76rem;
+  font-family: var(--font-mono);
+  color: #18181b;
+}
+
+.cinematic-trace-item.active {
+  background: #ecfeff;
+  border-color: #a5f3fc;
+  color: #0891b2;
+}
+
+.cinematic-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0891b2;
+}
+
+.cinematic-param-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 8px;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 0.75rem;
+}
+
+.cinematic-type {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.cinematic-pipeline-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #f8fafc;
+  font-size: 0.76rem;
+  color: #18181b;
+}
+
+.cinematic-step-num {
+  font-family: var(--font-mono);
+  color: #71717a;
+  font-size: 0.7rem;
+}
+
+.cinematic-status-ok {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Subtle Interactive Cue */
+.cinematic-interaction-cue {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: #52525b;
+  z-index: 20;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .cinematic-text-overlay {
+    top: 10%;
+    left: 20px;
+    right: 20px;
+    max-width: 100%;
+  }
+  .cinematic-technical-overlay {
+    display: none;
+  }
+  .cinematic-milestones {
+    display: none;
+  }
+}

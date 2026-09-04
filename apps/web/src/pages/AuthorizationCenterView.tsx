@@ -61,20 +61,17 @@ export const AuthorizationCenterView: React.FC<AuthorizationCenterProps> = ({
         amount: Number(originalAmount),
       };
 
-      const challengeRes = await fetch(
-        'http://localhost:4000/api/auth/webauthn/authorize/challenge',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            toolId: tamperToolId,
-            toolVersion: 1,
-            arguments: originalArgs,
-            requestId,
-            actorId: 'usr_ops_lead',
-          }),
-        },
-      );
+      const challengeRes = await fetch('/api/auth/webauthn/authorize/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toolId: tamperToolId,
+          toolVersion: 1,
+          arguments: originalArgs,
+          requestId,
+          actorId: 'usr_ops_lead',
+        }),
+      });
 
       const challengeData = await challengeRes.json();
       if (!challengeRes.ok) {
@@ -90,7 +87,7 @@ export const AuthorizationCenterView: React.FC<AuthorizationCenterProps> = ({
         amount: Number(tamperedAmount),
       };
 
-      const proposalRes = await fetch('http://localhost:4000/api/tool-proposals', {
+      const proposalRes = await fetch('/api/tool-proposals', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

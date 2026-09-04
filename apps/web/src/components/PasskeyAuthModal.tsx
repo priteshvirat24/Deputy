@@ -40,20 +40,17 @@ export const PasskeyAuthModal: React.FC<PasskeyAuthModalProps> = ({
 
     try {
       // 1. Request cryptographically bound WebAuthn challenge from server
-      const challengeRes = await fetch(
-        'http://localhost:4000/api/auth/webauthn/authorize/challenge',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            toolId,
-            toolVersion,
-            arguments: args,
-            requestId,
-            actorId: 'usr_ops_lead',
-          }),
-        },
-      );
+      const challengeRes = await fetch('/api/auth/webauthn/authorize/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toolId,
+          toolVersion,
+          arguments: args,
+          requestId,
+          actorId: 'usr_ops_lead',
+        }),
+      });
 
       const challengeData = await challengeRes.json();
       if (!challengeRes.ok) {
@@ -66,8 +63,8 @@ export const PasskeyAuthModal: React.FC<PasskeyAuthModalProps> = ({
       // 2. Invoke native browser WebAuthn passkey ceremony with User Verification
       const authResponse = await startAuthentication({ optionsJSON: options });
 
-      // 3. Verify authenticator assertion on server
-      const verifyRes = await fetch('http://localhost:4000/api/auth/webauthn/authorize/verify', {
+      // 3. Send authenticator assertion to server for cryptographic verification
+      const verifyRes = await fetch('/api/auth/webauthn/authorize/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

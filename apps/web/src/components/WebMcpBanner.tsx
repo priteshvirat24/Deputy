@@ -6,6 +6,9 @@ export const WebMcpBanner: React.FC = () => {
   const [capabilities, setCapabilities] = useState<WebMCPCapabilities>({
     available: false,
     provider: 'NONE',
+    location: 'none',
+    deprecatedAlias: false,
+    supportsSignalRetirement: false,
   });
 
   useEffect(() => {
@@ -20,9 +23,24 @@ export const WebMcpBanner: React.FC = () => {
         <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>WebMCP Engine:</span>
         <span style={{ color: capabilities.available ? '#34d399' : '#fcd34d' }}>
           {capabilities.available
-            ? 'Native Browser Active'
+            ? `Native Browser Active — ${capabilities.location}`
             : 'Fallback & Compatibility Mode Active'}
         </span>
+        {capabilities.deprecatedAlias && (
+          <span
+            title="Resolved via the deprecated navigator.modelContext alias. document.modelContext is canonical."
+            style={{
+              color: '#0f172a',
+              background: '#fcd34d',
+              fontWeight: 600,
+              fontSize: '0.7rem',
+              padding: '1px 6px',
+              borderRadius: '4px',
+            }}
+          >
+            deprecated alias
+          </span>
+        )}
         <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
           ({capabilities.reason || `Provider: ${capabilities.provider}`})
         </span>

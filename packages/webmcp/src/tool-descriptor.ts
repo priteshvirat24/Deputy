@@ -1,5 +1,5 @@
-import { LearnedTool } from '@deputy/domain';
-import { StructuredRefusal, WebMCPToolDefinition } from './types.js';
+import { LearnedTool, ReversibilityClassification } from '@deputy/domain';
+import { McpBehaviourHints, StructuredRefusal, WebMCPToolDefinition } from './types.js';
 
 export interface ExecutionDispatcher {
   dispatch: (
@@ -7,6 +7,27 @@ export interface ExecutionDispatcher {
     params: Record<string, unknown>,
     signal?: AbortSignal,
   ) => Promise<unknown | StructuredRefusal>;
+}
+
+/**
+ * Derive the standard MCP behavioural hints from DEPUTY's reversibility model.
+ * These are advisory only (Invariant 18): the authority decision is always
+ * re-made server-side and never reads them.
+ *
+ * - readOnlyHint is always false — every learned tool binds to a mutating
+ *   application action, so none can honestly claim to be read-only.
+ * - destructiveHint is true for IRREVERSIBLE and COMPENSATABLE actions;
+ *   compensation is a second write, not an undo, so it counts as destructive.
+ * - idempotentHint is omitted: idempotence cannot be inferred from a single
+ *   demonstration (WebMCP spec issue #267, turn awareness).
+ */
+export function deriveBehaviourHints(
+  reversibility: ReversibilityClassification,
+): McpBehaviourHints {
+  return {
+    readOnlyHint: false,
+    destructiveHint: reversibility !== 'REVERSIBLE',
+  };
 }
 
 export class ToolDescriptorTranslator {
@@ -24,8 +45,11 @@ export class ToolDescriptorTranslator {
     return {
       name: tool.name,
       description: tool.description,
+      inputSchema: tool.inputSchema,
+      // Deprecated alias kept for pre-standard consumers that read `parameters`.
       parameters: tool.inputSchema,
       annotations: {
+        ...deriveBehaviourHints(tool.reversibility),
         riskLevel: tool.riskLevel,
         reversibility: tool.reversibility,
         requiresHumanAuthorization: tool.approvalPolicy.requiresHumanAuthorization,
