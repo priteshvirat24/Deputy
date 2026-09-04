@@ -12,6 +12,7 @@ import { createAuthorizationRoutes } from './routes/authorizations.js';
 import { createDemonstrationRoutes } from './routes/demonstrations.js';
 import { createHealthRoutes } from './routes/health.js';
 import { createProposalRoutes } from './routes/proposals.js';
+import { createQuarantineRoutes } from './routes/quarantine.js';
 import { createSynthesisRoutes } from './routes/synthesis.js';
 import { createToolRoutes } from './routes/tools.js';
 import { createWebAuthnRoutes } from './routes/webauthn.js';
@@ -69,6 +70,7 @@ export function createApp(customServices?: AppServices) {
   app.route('/api/authorizations', createAuthorizationRoutes(services));
   app.route('/api/auth/webauthn', createWebAuthnRoutes(services));
   app.route('/api/audit', createAuditRoutes(services));
+  app.route('/api/quarantine', createQuarantineRoutes(services));
 
   // 4. Optional single-origin SPA serving (WebAuthn RP/origin agreement).
   if (env.SERVE_STATIC) {
